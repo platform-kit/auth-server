@@ -38,6 +38,7 @@ module.exports = new (function(){
 
 		this.utils.log(p.grant_url);
 
+		console.log(p);
 /*
 		opts.path = 'http://' + opts.host + ':' + opts.port + opts.path;
 		opts.headers = opts.headers||{};
@@ -45,11 +46,12 @@ module.exports = new (function(){
 		opts.host = '127.0.0.1';
 		opts.port = 8888;
 */
+
 		// Make the OAuth2 request
 		var post = this.utils.param({
 			code : p.code,
-			client_id : p.id,
-			client_secret : p.secret,
+			client_id : p.client_id || p.id,
+			client_secret : ( typeof p.id === 'string'?p.secret:p.id[p.client_id] ),
 			grant_type : 'authorization_code',
 			redirect_uri : encodeURIComponent(p.redirect_uri)
 		}, function(r){return r;});
@@ -69,6 +71,7 @@ module.exports = new (function(){
 			});
 			res.on('end', function () {
 
+				console.log(bits);
 				try{
 					data = JSON.parse(bits);
 				}
@@ -122,6 +125,7 @@ module.exports = new (function(){
 			// OAUTH2
 			//
 			if( p.code && p.state && p.redirect_uri ){
+
 
 
 				self.login( p, function(auth){
