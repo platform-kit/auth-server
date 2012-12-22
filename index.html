@@ -2,58 +2,401 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/> 
 <!-- use the latest IE browser always, and optionally use chrome frame if installed -->
 <meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1" />
-<script src="/_packages/document.js"></script>
-<link rel="stylesheet" href="/_packages/document.css"/>
 <title>HelloJS Server</title>
-<h1>hello-server</h1>
-<p>Authenticate OAuth2 server side</p>
-<blockquote>
-	<p>HelloJS Server interoperates with the <a href="http://adodson.com/hello.js">HelloJS client side SDK</a> to handle OAuth2 response used with the "code" interface.</p>
-</blockquote>
-
-<h2>hello-server.js</h2>
-<pre>
-
-// include the library
-var hello = require('hello-server');
-
-// Define the services which your server needs to support
-hello.init({
-	'github' : {
-		id : <q>YOUR CLIENT ID HERE</q>,
-		secret : <q>YOUR CLIENT SECRET HERE</q>,
-		grant_url : ''
+<style>
+	*{
+		box-sizing:border-box;
+		-moz-box-sizing:border-box;
 	}
-});
-
-// start web server
-var http = require('http');
-
-var app = http.createServer(function(req,res){
-
-});
-
-hello.listen(app);
-
-</pre>
-
-
-<h2>hello-modules.js</h2>
-<pre>
-module.exports = {
-	'google' : {
-		grant_url : 'https://accounts.google.com/o/oauth2/token'
-	},
-	'facebook' : {
-		grant_url : 'https://graph.facebook.com/oauth/access_token'
-	},
-	'windows' : {
-		grant_url : 'https://login.live.com/oauth20_token.srf'
-	},
-	'github' : {
-		grant_url : 'https://github.com/login/oauth/access_token'
+	html{
+		background-color: white;
 	}
-	//...
+	body{
+		font-family: helvetica;
+		display: inline-block;
+		text-align: center;
+		display: table-cell;
+		vertical-align: middle;
+		padding:0;
+		margin: 0;
+		height:100%;
+		display: table-cell;
+	}
+
+	button{
+		background: #10A54A;
+		color: white;
+		padding: 5px 10px;
+		border: 0;
+		font-size: 1.2em;
+		border-radius: 4px;
+		display: inline-block;
+		margin:1px;
+	}
+
+	section{
+		padding:20px;
+		text-align: center;
+		max-width:500px;
+		min-height:400px;
+		margin:0 auto;
+		display: none;
+	}
+
+	section.selected{
+		display: block;
+	}
+
+	#signin > button{
+		min-width:200px;
+		max-width:100%;
+		padding:5px 10px;
+		background-color: #0F6AB4;
+	}
+	#accounts{
+		padding:0 20px;
+	}
+
+	form{
+		display: none;
+		text-align: left;
+	}
+		#error{
+			display: block;
+			color: red;
+			font-size: 1.2em;
+			border: 1px solid red;
+			margin: 10px 0;
+			background-color: #FEE;
+			padding: 10px;
+		}
+		#error:empty{
+			display: none;
+		}
+		label{
+			text-align: left;
+			display: inline-block;
+		}
+			label img{
+				height:24px;
+				width:24px;
+				vertical-align: middle;
+				margin:0 10px;
+			}
+		label,label+input{
+			width:45%;
+		}
+		label+input{
+			width:50%;
+			min-width:200px;
+		}
+		input + label{
+			width:auto;
+		}
+		input{
+			font-size:1.2em;
+		}
+		input[readonly]{
+			background-color:#ddd;
+			color:#999;
+			border:1px solid #aaa;
+		}
+
+	.selected{
+		display: block;
+	}
+	.selected + .alternative{
+		display:none;
+	}
+
+	#about.selected ~ a.about{
+		display:none;
+	}
+
+</style>
+<body>
+<section id="about">
+	<h2>About</h2>
+	<p><b>//auth-server</b> is an OAuth1,1a,2 proxy. Built alongside <a href="http://adodson.com/hello.js/">HelloJS</a> it gets web apps connected easily. Its free to use, but comes with absolutly no warranty.</p>
+
+	<p>See <a href="https://github.com/mrswitch/hello.js/">https://github.com/mrswitch/hello.js/</a> for issues and comments.</p>
+
+	<p>conjured up by <a href="//adodson.com">Andrew Dodson</a></p>
+
+	<button onclick="back();">back</button>
+</section>
+<section id="home" class="selected">
+	<h1>Whoops, something snapped</h1>
+	<p>Administrators <a href="javascript:void(0)" onclick="next();">click here</a></p>
+	<p><button onclick="window.close();">close</button></p>
+</section>
+<section id="signin">
+	<h2>Account</h2>
+	<p>Please identify yourself with one of these providers</p>
+
+	<form style="padding:0 50px;">
+		<div class="accounts"></div>
+		<p style="text-align:right;"><button type="submit">Next</button></p>
+
+		<br />
+		<br />
+
+	</form>
+
+	<button class="google zocial" data-network="google">Signin with Google</button>
+	<button class="windows zocial" data-network="windows">Signin with Windows</button>
+	<button class="facebook zocial" data-network="facebook">Signin with Facebook</button>
+	<button class="yahoo zocial" data-network="yahoo">Signin with Yahoo</button>
+</section>
+<section id="register">
+	<h2>The app secret is unrecognised</h2>
+	<form>
+		<p>Check that your application is supplying the correct App ID and //auth-server has the right secret.</p>
+
+		<span id="error"></span>
+
+		<label>Network</label>
+		<input type="text" name="network" required/>
+
+		<hr />
+
+		<label>Application ID<br/>(client_id/consumer_key)</label>
+		<input type="text" name="client_id"  required/>
+
+		<hr />
+
+		<label>Application Secret<br/> (client_secret/ consumer_secret)</label>
+		<input type="text" name="client_secret" required/>
+ 
+		<hr />
+
+		<p>Use account</p>
+		<div class="accounts"></div>
+		<a style="float:right;font-size:smaller;" href="javascript:void(0);" onclick="next('signin')">Choose another account</a>
+		<br/>
+
+		<hr />
+
+		<button type="submit">Submit</button>
+	</form>
+	<div class="alternative">
+		<p>Please signin to affect changes</p>
+		<button onclick="next('signin');">Signin</button>
+	</div>
+</section>
+<section>
+	<h2>Successfully added application</h2>
+	<p><button onclick="window.close();">Close window</button></p>
+</section>
+<section id="fatal">
+	<h2>Fatal error</h2>
+	<p>The network <b class="network"></b>, does not recognise the provided App ID (otherwise known as the Consumer Key or Client_id)</p>
+	<pre class="client_id" style="word-wrap:break-word;white-space:pre-wrap;"></pre>
+</section>
+<a href="javascript:void(0);" onclick="next('about');" class="about">About</a>
+<script>
+
+var selectedList = [];
+
+function next(selected){
+	var sections =  document.getElementsByTagName('section');
+
+	if(typeof(selected)==="string"){
+		selected = document.getElementById(selected);
+	}
+	else if(!selected){
+		for(var i=0;i<sections.length;i++){
+			if(sections[i].className.match("selected")){
+				selected = sections[i+1];
+				break;
+			}
+		}
+	}
+
+	selectedList.push(selected);
+
+	for(var i=0;i<sections.length;i++){
+		if(sections[i] !== selected ){
+			sections[i].className = (sections[i].className||'').replace(/selected/g, '');
+		}
+	}
+
+	selected.className = ( selected.className || '' ) + ' selected';
+
+	return;
 }
 
-</pre>
+
+function back(){
+	var i = selectedList.length-2;
+	if(i>=0){
+		next(selectedList[i]);
+	}
+}
+
+function toggle(el){
+	if(typeof(el)==='string'){
+		el = document.getElementById(el);
+	}
+	// element style
+	var display = el.style.display;
+
+	// get computed style
+	if(!display){
+		try{
+			display = window.getComputedStyle(el, null).getPropertyValue("display");
+		}catch(e){
+
+		}
+	}
+
+	el.style.display = (display==="none"?"block":"none");
+}
+
+window.onresize = function(){
+	document.body.style.height = window.innerHeight + "px";
+	document.body.style.width = window.innerWidth + "px";
+}
+
+window.onresize();
+
+next("home");
+
+if(window.location.hash&&window.location.hash.match('state=')){
+	next();
+}
+
+
+</script>
+<script src="//local.knarly.com/hello.js/hello.js"></script>
+<script src="client_ids.js"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>-->
+<script src="//local.knarly.com/_packages/jquery.js"></script>
+<script>
+
+hello.subscribe('auth.login', function(auth){
+	hello.api(auth.network+":me", function(o){
+		if(!o||o.error){
+			return;
+		}
+
+		// Show the form
+		$("form").addClass('selected');
+
+		var len = $('form input[name=admin_id]').length;
+
+		// Add item to form
+		$("<input/>").attr({
+			'id' : auth.network,
+			'type' :'radio',
+			'name'	: 'admin_id',
+			'checked' : len===0
+		}).val(o.id + "@" + auth.network).appendTo('.accounts')
+
+
+		$("<label>").attr({
+			'for' : auth.network,
+		}).html("<img src='"+o.thumbnail+"' /><b>" + o.name + "</b> at " + auth.network).appendTo('.accounts');
+
+		$("<br/><br/>").appendTo('.accounts');
+
+	});
+});
+
+hello.init(CLIENT_IDS, {
+	redirect_uri : "/",
+	display : "page",
+	oauth_proxy : "/proxy"
+});
+
+// Has the user ever signed in?
+if(hello.getAuthResponse()){
+	next("register");
+}
+
+//
+// ADD EVENTS TO LOGIN BUTTONS
+//
+$('#signin > button').click(function(){
+	hello.logout(this.getAttribute('data-network'));
+	hello.login(this.getAttribute('data-network'), {state:{
+		prefill_network : prefill.network,
+		prefill_client_id : prefill.client_id,
+		error : prefill.error
+	}});
+});
+
+
+//
+// PREFILL THE FORM
+//
+var prefill = hello.utils.param(window.location.hash);
+if(prefill.state){
+	var json = JSON.parse(prefill.state);
+	prefill = {
+		network:json.prefill_network,
+		client_id:json.prefill_client_id,
+		error:json.error
+	}
+}
+
+for(var x in prefill){
+	$("."+x).text(prefill[x]);
+}
+
+
+// Wait?
+if(prefill.error==='consumer_key_unknown'){
+	next("fatal");
+}
+
+$("#register form input").each(function(){
+	if(this.name in prefill && prefill[this.name] ){
+		this.value = prefill[this.name];
+		this.setAttribute('readonly',true);
+	}
+});
+
+
+//
+// ADD FORM SUBMIT EVENTS
+//
+$("form").on("change","input[name=admin_id]",function(){
+	if($(this).is(":checked")){
+		var self = this;
+		$("form input[name=admin_id]").filter(function(){
+				return $(this).val() === $(self).val();
+			}).attr('checked', true);
+	}
+});
+
+
+$("#signin form").submit(function(e){
+	e.preventDefault();
+	next();
+});
+
+
+$("#register form").submit(function(e){
+	$("#error").text("");
+	e.preventDefault();
+	$.post("/rest", $(this).serialize(), function(data,res){
+
+		if(typeof(data)==='string'){
+			data = JSON.parse(data);
+		}
+
+		if(data.success){
+			next();
+			$("section.selected h2").text("Successfully "+ data.success +" application");
+		}
+		else{
+			$("#error").text(data.error);
+		}
+	});
+});
+
+
+
+</script>
+</body>
