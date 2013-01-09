@@ -10,6 +10,9 @@ var http=require('http');
 var pg = require('pg');
 var client = new pg.Client(process.env.DATABASE_URL||"tcp://postgres:root@localhost/postgres");
 
+console.log("Starting new process");
+console.log(process.env.DATABASE_URL);
+
 client.connect();
 
 var app = http.createServer(function(req,res){
