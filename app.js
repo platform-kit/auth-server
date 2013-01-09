@@ -8,10 +8,10 @@ var port=process.env.PORT || 5500;
 var http=require('http');
 
 var pg = require('pg');
-var client = new pg.Client(process.env.DATABASE_URL||"tcp://postgres:root@localhost/postgres");
+var client = new pg.Client(process.env.HEROKU_POSTGRESQL_BLUE_URL||"tcp://postgres:root@localhost/postgres");
 
 console.log("Starting new process");
-console.log(process.env.DATABASE_URL);
+console.log(process.env.HEROKU_POSTGRESQL_BLUE_URL);
 
 client.connect();
 
