@@ -268,10 +268,12 @@ if(window.location.hash&&window.location.hash.match('state=')){
 
 
 </script>
-<script src="//local.knarly.com/hello.js/hello.js"></script>
+<!--
+<script src="/hello.js/hello.js"></script>
+-->
+<script src="http://local.knarly.com/hello.js/hello.all.js"></script>
 <script src="client_ids.js"></script>
-<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>-->
-<script src="//local.knarly.com/_packages/jquery.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script>
 
 hello.subscribe('auth.login', function(auth){
@@ -330,7 +332,13 @@ $('#signin > button').click(function(){
 //
 // PREFILL THE FORM
 //
-var prefill = hello.utils.param(window.location.hash);
+var prefill = {};
+if(window.location.hash){
+	prefill = hello.utils.param(window.location.hash);
+}
+if(window.location.search){
+	prefill = hello.utils.merge( prefill, hello.utils.param(window.location.search) );
+}
 if(prefill.state){
 	var json = JSON.parse(prefill.state);
 	prefill = {

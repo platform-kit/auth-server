@@ -41,7 +41,7 @@ function encode(s){
 }
 
 module.exports = new (function(){
-	this.sign =  function( uri, opts, consumer_secret, token_secret, nonce ){
+	this.sign =  function( uri, opts, consumer_secret, token_secret, nonce, method, data ){
 
 		console.log(arguments);
 
@@ -66,31 +66,37 @@ module.exports = new (function(){
 		// Merge opts and querystring
 		query = merge( query, opts || {} );
 		query = merge( query, qs || {} );
+		query = merge( query, data || {} );
 
 		// Sort in order of properties
 		var keys = Object.keys(query);
 		keys.sort();
-		var params = [];
+		var params = [],
+			_queryString = [];
 
 		keys.forEach(function(k){
 			if(query[k]){
 				params.push( k + "=" + encode(query[k]) );
+				if( !data || !(k in data)){
+					_queryString.push( k + "=" + encode(query[k]) );
+				}
 			}
 		});
 
 		params = params.join('&');
+		_queryString = _queryString.join('&');
 
-		var http = ["GET", encode(path).replace(/\+/g," ").replace(/\%7E/g,'~'), encode(params).replace(/\+/g," ").replace(/\%7E/g,'~') ];
+		var http = [method || "GET", encode(path).replace(/\+/g," ").replace(/\%7E/g,'~'), encode(params).replace(/\+/g," ").replace(/\%7E/g,'~') ];
 		console.log(http.join('&'));
 		console.log(consumer_secret+'&'+(token_secret||''));
 
 		// Create oauth_signature
-		query.oauth_signature = hashString( 
-			consumer_secret+'&'+(token_secret||''), 
+		query.oauth_signature = hashString(
+			consumer_secret+'&'+(token_secret||''),
 			http.join('&'),
 			"base64"
 		);
 
-		return path + '?' + params +'&oauth_signature='+encode( query.oauth_signature );
+		return path + '?' + _queryString +'&oauth_signature='+encode( query.oauth_signature );
 	};
 });

@@ -24,8 +24,13 @@ var app = http.createServer(function(req,res){
 
 		// Function
 		rest(req, function(response){
+			var qs = hello.utils.param(location.search||'');
+			var body = JSON.stringify(response);
+			if(qs&&qs.callback){
+				body = qs.callback + "(" + body + ")";
+			}
 			res.writeHead(200, { 'Content-Type': contentType });
-			res.end(JSON.stringify(response), 'utf-8');
+			res.end(body, 'utf-8');
 			return;
 		});
 

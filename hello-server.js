@@ -1,4 +1,5 @@
 var https = require('https');
+var http = require('http');
 var url = require('url');
 //var hello_modules = require('./hello_modules.js');
 var oauth = require('./oauth.js');
@@ -328,11 +329,37 @@ module.exports = new (function(){
 						path = oauth.sign( p.path, {
 							oauth_token: token[2],
 							oauth_consumer_key : token[4]
-						}, response, token[3] );
+						}, response, token[3], null, (p.method||req.method).toUpperCase(), p.data?JSON.parse(p.data):null);
 					}
 
-					res.writeHead(302, { 'Access-Control-Allow-Origin':'*', 'Location': path });
-					res.end();
+					if(req.method==='GET'&&(!p.method||p.method.toUpperCase()==='GET')){
+						// redirect the users browser to the new path
+						res.writeHead(302, { 'Access-Control-Allow-Origin':'*', 'Location': path });
+						res.end();
+					}
+					else{
+						if(p.callback){
+							path = p.callback + "('" + path + "')";
+						}
+						res.writeHead(200, { 'Access-Control-Allow-Origin':'*' });
+						res.end( path ,"utf8");
+
+						// Make the request internally and spit out the response
+						/*
+						var data = '';
+						req.on('data', function(chunk){
+							data += chunk;
+						});
+						req.on('end', function(){
+							console.log("MAKING INTERNAL " + req.method);
+							http.request({
+
+							}, function(res){
+
+							});
+						});
+						*/
+					}
 				});
 
 				return;
