@@ -102,7 +102,7 @@ hello.subscribe('auth.login', function(auth){
 });
 
 hello.init(CLIENT_IDS, {
-	redirect_uri : "redirect.html",
+	redirect_uri : "/",
 	display : "page",
 	oauth_proxy : "/proxy"
 });
