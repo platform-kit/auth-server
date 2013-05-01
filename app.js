@@ -1,89 +1,43 @@
-var fs = require('fs');
-var path = require('path');
 var url = require('url');
+var connect = require('connect');
 var hello = require('./hello-server.js');
 
 var port=process.env.PORT || 5500;
 
-var http=require('http');
 
+//
+// Initiate the database
+//
 var pg = require('pg');
-var client = new pg.Client(process.env.HEROKU_POSTGRESQL_BLUE_URL||"tcp://postgres:root@localhost/postgres");
-
-console.log("Starting new process");
-console.log(process.env.HEROKU_POSTGRESQL_BLUE_URL);
-
+var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL||"tcp://postgres:root@localhost/postgres";
+var client = new pg.Client(conn);
 client.connect();
+console.log("Connected to POSTGRESQL " + conn);
 
-var app = http.createServer(function(req,res){
 
+//
+// Connect to the http server
+//
+var app = connect().use( connect.static( __dirname + '/bin') );
+app.use("/rest", function(req,res){
+	// Function
 	var location = url.parse(req.url);
-	var pathname = location.pathname;
-
-	if(pathname==="/rest"){
-
-		// Function
-		rest(req, function(response){
-			var qs = hello.utils.param(location.search||'');
-			var body = JSON.stringify(response);
-			if(qs&&qs.callback){
-				body = qs.callback + "(" + body + ")";
-			}
-			res.writeHead(200, { 'Content-Type': contentType });
-			res.end(body, 'utf-8');
-			return;
-		});
-
+	rest(req, function(response){
+		var qs = hello.utils.param(location.search||'');
+		var body = JSON.stringify(response);
+		if(qs&&qs.callback){
+			body = qs.callback + "(" + body + ")";
+		}
+		res.writeHead(200, { 'Content-Type': 'application/json' });
+		res.end(body, 'utf-8');
 		return;
-	}
-
-	var filePath = '.' + pathname;
-	if (filePath == './')
-		filePath = './index.html';
-
-	console.log('request starting: ' + filePath);
-
-	var extname = path.extname(filePath);
-	var contentType = {
-		'js' : 'text/javascript',
-		'css' : 'text/css',
-		'png' : 'image/png',
-		'ogg' : 'audio/ogg',
-		'mp3' : 'audio/mpeg3'
-	}[extname.replace(/^\./,'')] || 'text/html';
-
-	path.exists(filePath, function(exists) {
-
-		if (exists) {
-			fs.readFile(filePath, function(error, content) {
-				if (error) {
-					res.writeHead(500);
-					res.end();
-					return;
-				}
-				else {
-					res.writeHead(200, { 'Content-Type': contentType });
-					res.end(content, 'utf-8');
-					return;
-				}
-			});
-		}
-		else if(filePath.indexOf('/')>-1 ){
-			res.writeHead(301, { 'Location': "http://adodson.com/"+ filePath});
-			res.end();
-			return;
-		}
-		else{
-			res.writeHead(404);
-			res.end();
-			return;
-		}
 	});
 
-	//res.end();
+	return;
+});
+app.listen(port);
 
-}).listen(port);
-
+console.log("HTTP server listening on port "+ port);
 
 
 
@@ -113,7 +67,7 @@ function rest(req, callback){
 	// Get the data
 	getData(function(data){
 
-		if(!data.network||!data.client_id||!data.client_secret||!data.admin_id){
+		if( !data || !data.network||!data.client_id||!data.client_secret||!data.admin_id){
 			callback({
 				error : "Missing data"
 			});

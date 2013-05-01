@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "dependencies": {
   	"pg": "0.6.15",
-  	"crypto" : "0.0.3"
+  	"crypto" : "0.0.3",
+  	"connect" : ""
   },
   "engines": {
     "node": "0.8.x"
