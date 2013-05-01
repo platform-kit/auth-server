@@ -1,10 +1,10 @@
 {
   "name": "HelloJS",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dependencies": {
   	"pg": "0.6.15",
   	"crypto" : "0.0.3",
-  	"connect" : ""
+  	"connect" : "2.7.x"
   },
   "engines": {
     "node": "0.8.x"
