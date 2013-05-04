@@ -71,8 +71,8 @@ https://auth-server.herokuapp.com/proxy
 ?redirect_uri=[REDIRECT_PATH]
 &code=[AUTH_CODE]
 &client_id=[APP_KEY]
-&network=[NETWORK_NAME]
 &state=[STATE]
+&grant_url=[PROVIDERS_OAUTH2_GRANT_URL]
 </pre>
 
 <p>The client will be redirected back to the location of [REDIRECT_PATH], with the contents of the server response as well as whatever was defined in the [STATE] in the hash. e.g...
@@ -89,12 +89,11 @@ https://auth-server.herokuapp.com/proxy
 <pre>
 https://auth-server.herokuapp.com/proxy
 ?redirect_uri=[REDIRECT_PATH]
-&request=[OAUTH_REQUEST_TOKEN_URL]
-&auth=[OAUTH_AUTHORIZATION_URL]
-&token=[OAUTH_TOKEN_URL]
 &client_id=[APP_KEY]
+&request_url=[OAUTH_REQUEST_TOKEN_URL]
+&auth_url=[OAUTH_AUTHORIZATION_URL]
+&token_url=[OAUTH_TOKEN_URL]
 &state=[STATE]
-&network=[NETWORK_NAME]
 </pre>
 
 <p>//auth-server signs the client request and redirects the user to the providers login page defined by [OAUTH_AUTHRIZATION_URL].</p>
@@ -104,14 +103,11 @@ https://auth-server.herokuapp.com/proxy
 <p>The provider should have included an oauth_callback parameter which was defined by //auth-server, this includes part of the path where the token can be returned for an access token. The total path response shall look something like this.</p>
 
 <pre>
-[REDIRECT_PATH]?state=[STATE]
+[REDIRECT_PATH]
+?state=[STATE]
 &proxy_url=https://auth-server.herokuapp.com/proxy
-&token_url=[OAUTH_TOKEN_URL]
-&redirect_uri=[REDIREC_PATH]
-&request=[OAUTH_REQUEST_TOKEN_URL]
-&auth=[OAUTH_AUTHORIZATION_URL]
-&token=[OAUTH_TOKEN_URL]
 &client_id=[APP_KEY]
+&token_url=[OAUTH_TOKEN_URL]
 &oauth_token=abc12465
 </pre>
 
@@ -121,10 +117,9 @@ https://auth-server.herokuapp.com/proxy
 https://auth-server.herokuapp.com/proxy
 ?oauth_token=abc12465
 &redirect_uri=[REDIRECT_PATH]
-&state=[STATE]
-&token=[OAUTH_TOKEN_URL]
 &client_id=[APP_KEY]
-&network=[NETWORK_NAME]
+&state=[STATE]
+&token_url=[OAUTH_TOKEN_URL]
 </pre>
 
 </p>Finally the //auth-server returns the access_token to your redirect path and its the responsibility of your script to store this in the client in order to make subsequent API calls.</p>

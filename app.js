@@ -203,11 +203,11 @@ hello.interceptRedirect = function(path,hash){
 //
 // Override the credentials access
 // Return the secret from a database
-hello.getCredentials = function(network,id,callback){
+hello.getCredentials = function(id,callback){
 
 	// No Credentials?
 	// Retrun NULL, and accept default handling
-	if(!network||!id){
+	if(!id){
 		callback(null);
 		return;
 	}
@@ -216,8 +216,8 @@ hello.getCredentials = function(network,id,callback){
 	// Search the database
 	// Get all the current stored credentials
 	//
-	db.query('SELECT client_secret FROM apps WHERE client_id = $1 AND service = $2 LIMIT 1',
-		[id, network],
+	db.query('SELECT client_secret FROM apps WHERE client_id = $1 LIMIT 1',
+		[id],
 		function(err,result){
 
 			//Callback

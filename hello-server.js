@@ -42,7 +42,7 @@ module.exports = new (function(){
 		opts.port = 8888;
 */
 
-		self.getCredentials(p.network, p.client_id || p.id, function(response){
+		self.getCredentials( p.client_id || p.id, function(response){
 
 			// Make the OAuth2 request
 			var post = self.utils.param({
@@ -53,7 +53,7 @@ module.exports = new (function(){
 				redirect_uri : encodeURIComponent(p.redirect_uri)
 			}, function(r){return r;});
 
-			var opts = url.parse(p.oauth.grant);
+			var opts = url.parse( p.grant_url || p.oauth.grant );
 			opts.method = 'POST';
 			opts.headers = {
 				'Content-length': post.length,
@@ -219,17 +219,17 @@ module.exports = new (function(){
 			//
 			// The access_token is of the format which can be decomposed
 			//
-			var token = p.access_token.match(/^([a-z]+)\:\/\/([^:]+)\:([^@]+)@(.+)$/);
+			var token = p.access_token.match(/^([^:]+)\:([^@]+)@(.+)$/);
 			var path = p.path;
 
-			self.getCredentials( token[1], token[4], function(client_secret){
+			self.getCredentials( token[3], function(client_secret){
 
 				if(client_secret){
 
 					path = oauth.sign( p.path, {
-						oauth_token: token[2],
-						oauth_consumer_key : token[4]
-					}, client_secret, token[3], null, (p.method||req.method).toUpperCase(), p.data?JSON.parse(p.data):null);
+						oauth_token: token[1],
+						oauth_consumer_key : token[3]
+					}, client_secret, token[2], null, (p.method||req.method).toUpperCase(), p.data?JSON.parse(p.data):null);
 
 				}
 
@@ -252,13 +252,10 @@ module.exports = new (function(){
 	// getCredentials
 	// Given a network name and a client_id, returns the client_secret
 	//
-	this.getCredentials = function(network, id, callback){
-		if(!network||!id){
-			callback(false);
-			return;
-		}
-		var p = services[network];
-		callback( typeof p.id === 'string'?p.secret:p.id[id] );
+	this.getCredentials = function(id, callback){
+
+		callback( id ? services[id] : false );
+
 	};
 
 
@@ -286,7 +283,7 @@ module.exports = new (function(){
 		if(!p.oauth_token){
 
 			// Change the path to be that of the intiial handshake
-			path = p.oauth.request;
+			path = (p.request_url || p.oauth.request);
 
 			//
 			// Create the URL of this service
@@ -296,8 +293,7 @@ module.exports = new (function(){
 			var oauth_callback = p.redirect_uri + (p.redirect_uri.indexOf('?')>-1?'&':'?') + self.utils.param({
 				proxy_url : self.location.protocol + '//'+ self.location.host + self.location.pathname,
 				state     : p.state,
-				token_url : p.oauth.token,
-				network   : p.network,
+				token_url : p.token_url || p.oauth.token,
 				client_id : p.client_id
 			}, function(r){
 				// Encode all the parameters
@@ -305,7 +301,7 @@ module.exports = new (function(){
 			});
 
 			// Version 1.0a requires the oauth_callback parameter for signing the request
-			if(p.oauth.version==='1.0a'){
+			if( (o.version || p.oauth.version ) ==='1.0a'){
 				// Define the OAUTH CALLBACK Parameters
 				opts.oauth_callback = oauth_callback;
 			}
@@ -335,7 +331,7 @@ module.exports = new (function(){
 		// Find the client secret
 		// Get the client secret
 		//
-		self.getCredentials( p.network, p.client_id, function(client_secret){
+		self.getCredentials( p.client_id, function(client_secret){
 
 			if(!client_secret){
 				callback( p.redirect_uri, {
@@ -387,7 +383,7 @@ module.exports = new (function(){
 						}
 
 						// Great redirect the user to authenticate
-						callback( p.oauth.auth + '?' + self.utils.param({
+						callback( (p.auth_url||p.oauth.auth) + '?' + self.utils.param({
 							oauth_token : json.oauth_token,
 							oauth_callback : oauth_callback
 						}) );
@@ -397,7 +393,7 @@ module.exports = new (function(){
 						// Step 2
 						// We should now have everything we need for an access_token
 						callback( p.redirect_uri, {
-							access_token : p.network + "://" + json.oauth_token +':'+json.oauth_token_secret+'@'+p.client_id,
+							access_token : json.oauth_token +':'+json.oauth_token_secret+'@'+p.client_id,
 							state : p.state
 						});
 					}
