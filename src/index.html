@@ -67,7 +67,7 @@ table.apps td{
 <p>The OAuth2 flow starts when your application sends a client out to a providers site to grant permissions. The response is an authorization code "[AUTH_CODE]" which is returned to your site, this needs to be exchanged for an Access Token. Your page then needs to send this code to the //auth-server with your client_id in exhchange for an access token, e.g.</p>
 
 <pre>
-https://auth-server.herokuapp.com/
+https://auth-server.herokuapp.com/proxy
 ?redirect_uri=[REDIRECT_PATH]
 &code=[AUTH_CODE]
 &client_id=[APP_KEY]
@@ -87,7 +87,7 @@ https://auth-server.herokuapp.com/
 <p>OAuth 1.0 has a number of steps so forgive the verbosity here. An app is required to make an initial request to the //auth-server, which in-turn initiates the authentication flow.</p>
 
 <pre>
-https://auth-server.herokuapp.com/
+https://auth-server.herokuapp.com/proxy
 ?redirect_uri=[REDIRECT_PATH]
 &request=[OAUTH_REQUEST_TOKEN_URL]
 &auth=[OAUTH_AUTHORIZATION_URL]
@@ -105,7 +105,7 @@ https://auth-server.herokuapp.com/
 
 <pre>
 [REDIRECT_PATH]?state=[STATE]
-&proxy_url=https://auth-server.herokuapp.com
+&proxy_url=https://auth-server.herokuapp.com/proxy
 &token_url=[OAUTH_TOKEN_URL]
 &redirect_uri=[REDIREC_PATH]
 &request=[OAUTH_REQUEST_TOKEN_URL]
@@ -118,7 +118,7 @@ https://auth-server.herokuapp.com/
 <p>The page you defined locally as the [REDIRECT_PATH], must then construct a call to //auth-server to exchange the unauthorized oauth_token for an access token. This would look like this...</p>
 
 <pre>
-https://auth-server.herokuapp.com
+https://auth-server.herokuapp.com/proxy
 ?oauth_token=abc12465
 &redirect_uri=[REDIRECT_PATH]
 &state=[STATE]
@@ -141,7 +141,7 @@ https://auth-server.herokuapp.com
 <p>To sign a request to [API_PATH], use the [access_token] returned in OAuth 1.0 above and send to the auth-server</p> 
 
 <pre>
-https://auth-server.herokuapp.com?access_code=[ACCESS_CODE]&path=[API_PATH]
+https://auth-server.herokuapp.com/proxy?access_code=[ACCESS_CODE]&path=[API_PATH]
 </pre>
 <p>The response redirects the requests to the [API_PATH] and signs it for you. e.g.</p>
 <pre>
