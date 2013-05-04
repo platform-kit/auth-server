@@ -14,10 +14,20 @@ var buildDist = require('../../_packages/buildDist.js');
 
 buildDist({
 	'../bin/index.html' : 'index.html',
-	'../bin/redirect.html' : 'redirect.html'
+	'../bin/redirect.html' : 'redirect.html',
+	'../README.md' : 'index.html'
 }, {
-	// We want to embed all scripts into the HTML document
+	// We want to embed all scripts into the HTML document?	// embed : true,
 	embed : true,
+
+	// No, this will break Angular code, which relies on $args
+	minify : false,
+
 	// This is the root directory on the local filesystem where root referenced scripts can be found.
-	root_dir : "D:/Projects/"
+	root_dir : "D:/Projects/",
+
+	replace : {
+		'http://localhost:5500' : 'https://auth-server.herokuapp.com',
+		'/_packages/angular.min.js' : 'https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js'
+	}
 });

@@ -26,3 +26,7 @@ var CLIENT_IDS = {
 		'auth-server.herokuapp.com' : 'dj0yJmk9M1JuUWFaRHl5U01nJmQ9WVdrOWMzZHBVRFJsTXpJbWNHbzlNVEExTURVeE5qYzJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0wNg--'
 	}[window.location.hostname]
 };
+
+var REDIRECT_URI = {
+	'local.knarly.com' : '/hello.js/redirect.html'
+}[window.location.hostname] || './redirect.html';

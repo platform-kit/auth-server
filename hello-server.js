@@ -42,12 +42,7 @@ module.exports = new (function(){
 		opts.port = 8888;
 */
 
-		this.utils.findSecret(p.network, p.client_id || p.id, function(response){
-
-			if(typeof(response)==='function'){
-				callback(response);
-				return;
-			}
+		self.getCredentials(p.network, p.client_id || p.id, function(response){
 
 			// Make the OAuth2 request
 			var post = self.utils.param({
@@ -102,7 +97,9 @@ module.exports = new (function(){
 
 
 	//
-	// Bind to an existing request
+	// Listen
+	// Bind to an existing server listener
+	//
 	this.listen = function(server, requestPathname){
 
 		// Store old Listeners
@@ -125,275 +122,292 @@ module.exports = new (function(){
 				return;
 			}
 
-			// if the querystring includes
-			// An authentication "code",
-			// client_id e.g. "1231232123",
-			// response_uri, "1231232123",
-			var p = self.utils.param(url.parse(req.url).search);
-			var path;
-			var state = p.state;
+			//
+			self.request(req,res);
 
-			if(state&&state.match(/^\{.*\}$/)){
-				// decompose the p.state, redefine p
-				p = self.utils.merge( p, JSON.parse(state) );
-				p.state = state; // set this back to the string
+		});
+	};
+
+
+	//
+	// Request
+	// Defines the callback from the server listener
+	this.request = function(req,res){
+
+		// if the querystring includes
+		// An authentication "code",
+		// client_id e.g. "1231232123",
+		// response_uri, "1231232123",
+		var p = self.utils.param(url.parse(req.url).search);
+		var state = p.state;
+
+
+		// Has the parameters been stored in the state attribute?
+		try{
+			// decompose the p.state, redefine p
+			p = self.utils.merge( p, JSON.parse(p.state) );
+			p.state = state; // set this back to the string
+		}
+		catch(e){
+		}
+		console.log(p);
+
+
+		//
+		// Process, pass the request the to be processed,
+		// The returning function contains the data to be sent
+		function redirect(path, hash){
+
+			// Overwrite intercept
+			if("interceptRedirect" in self){
+				self.interceptRedirect(path,hash);
 			}
 
-			console.log(p);
+			res.writeHead(302, {
+				'Access-Control-Allow-Origin':'*',
+				'Location': path + (hash ? '#'+ self.utils.param( hash ) : null) } );
+			res.end();
+		}
 
-			//
-			// OAUTH2
-			//
-			if( p.code && p.state && p.redirect_uri ){
+		function serveUp(body){
+			if(p.callback){
+				body = p.callback + "('" + body + "')";
+			}
+			res.writeHead(200, { 'Access-Control-Allow-Origin':'*' });
+			res.end( body ,"utf8");
+		}
 
 
+		//
+		// OAUTH2
+		//
+		if( p.code && p.state && p.redirect_uri ){
 
-				self.login( p, function(response){
+			self.login( p, function(response){
 
-					// Auth
-					if(typeof(response)==='function'){
-						response(res);
-						return;
-					}
-
-					// Redirect page
-					// With the Auth response, we need to return it to the parent
-					var url = p.redirect_uri + '#'+ self.utils.param(self.utils.merge({state:p.state, expires_in:3600}, response));
-					res.writeHead(302, { 'Location': url });
-					res.end();
-					return;
-
-				});
+				// Redirect page
+				// With the Auth response, we need to return it to the parent
+				redirect( p.redirect_uri, self.utils.merge({state:p.state, expires_in:3600}, response));
 				return;
-			}
+
+			});
+			return;
+		}
+
+
+		//
+		// OAUTH1
+		//
+		else if( ( p.redirect_uri && p.oauth && parseInt(p.oauth.version,10) === 1 ) || ( p.token_url ) ){
+
+			self.location = url.parse("http"+(req.connection.encrypted?"s":'')+'://'+req.headers.host+req.url);
+
+			self.loginOAuth1(p, function(path,hash){
+				redirect(path,hash);
+			});
+
+			return;
+		}
+
+		//
+		// SUBSEQUENT SIGNING OF REQUESTS
+		// Previously we've been preoccupoed with handling OAuth authentication/
+		// However OAUTH1 also needs every request to be signed.
+		//
+		else if( p.access_token && p.path ){
 
 			//
-			// OAUTH1
+			// The access_token is of the format which can be decomposed
 			//
-			else if( ( p.redirect_uri && p.oauth && parseInt(p.oauth.version,10) === 1 ) || ( p.token_url ) ){
+			var token = p.access_token.match(/^([a-z]+)\:\/\/([^:]+)\:([^@]+)@(.+)$/);
+			var path = p.path;
 
-				//
-				// Get the Authorization path
-				//
-				// p = self.utils.merge(services[p.network], p);
+			self.getCredentials( token[1], token[4], function(client_secret){
 
-				path = p.oauth.request;
+				if(client_secret){
 
-				var	token_secret = null;
+					path = oauth.sign( p.path, {
+						oauth_token: token[2],
+						oauth_consumer_key : token[4]
+					}, client_secret, token[3], null, (p.method||req.method).toUpperCase(), p.data?JSON.parse(p.data):null);
+				}
 
-				var opts = {
-					oauth_consumer_key : p.client_id
-				};
-
-				// Request
-				if(!p.oauth_token){
-					// Redefine the redirect_uri
-					
-					var scheme = url.parse('http://'+req.headers.host+req.url);
-					// Callback
-					var oauth_callback = p.redirect_uri + (p.redirect_uri.indexOf('?')>-1?'&':'?') + self.utils.param({
-						proxy_url : scheme.protocol + '//'+ scheme.host +scheme.pathname,
-						state     : state,
-						token_url : p.oauth.token,
-						network   : p.network,
-						client_id : p.client_id
-					}, function(r){return encodeURIComponent(r);});
-
-					// Version 1.0a requires the oauth_callback parameter for signing the request
-					if(p.oauth.version==='1.0a'){
-						opts.oauth_callback = oauth_callback;
-					}
-
-					console.log(oauth_callback);
+				if(req.method==='GET'&&(!p.method||p.method.toUpperCase()==='GET')){
+					// redirect the users browser to the new path
+					redirect(path);
 				}
 				else{
-					// The user has identified themselves
-					// Get the access_token
-					// Change path to the token
-					path = p.token_url || p.oauth.token;
-
-					opts.oauth_token = p.oauth_token;
-					if(p.oauth_verifier){
-						opts.oauth_verifier = p.oauth_verifier;
-					}
-
-					// Get secret from temp storage
-					token_secret = _token_secrets[p.oauth_token];
+					serveUp(path);
 				}
+			});
 
-
-				// Sign the request
-				self.utils.findSecret( p.network, p.client_id, function(response){
-
-					if(typeof(response)==='function'){
-						response(res);
-						return;
-					}
-
-					var signed_url = oauth.sign( path, opts, response, token_secret );
-
-					console.log(signed_url);
-
-					// Make the call
-					https.get( url.parse(signed_url), function(r){
-
-						console.log("RESPONSE"+r.statusCode);
-
-						var data = '';
-						r.on('data', function(chunk){
-							data += chunk;
-						});
-
-						r.on('end', function(){
-
-							var json = {};
-							if(data.toString()[0]==="{"){
-								json = JSON.parse(data.toString());
-							}
-							else{
-								json = self.utils.param(data.toString());
-							}
-
-							if(json.oauth_token_secret){
-								_token_secrets[json.oauth_token] = json.oauth_token_secret;
-							}
-
-							var path;
-
-							if(json.error||r.statusCode===401){
-
-								// Error
-								if(!json.error){
-									json = {error:json.oauth_problem||"401 could not authenticate"};
-								}
-								console.log(data.toString());
-
-								// overwrite data
-								data = self.utils.merge(json,{
-									query : p
-								});
-
-								self.trigger("oauth.exception", data, req, res, function(){
-									var path = p.redirect_uri + '#' + self.utils.param(json);
-									res.writeHead(302, { 'Location': path });
-									res.end();
-								});
-								return;
-							}
-							// Was this a preflight request
-							else if(!p.oauth_token){
-								// Great redirect the user to authenticate
-								path = p.oauth.auth + '?' + self.utils.param({
-									oauth_token : json.oauth_token,
-									oauth_callback : oauth_callback
-								});
-							}
-
-							else{
-								// We should now have everything we need for an access_token
-								path = p.redirect_uri + '#' + self.utils.param({
-									access_token : p.network + "://" + json.oauth_token +':'+json.oauth_token_secret+'@'+p.client_id,
-									state : state
-								});
-							}
-
-							res.writeHead(302, { 'Location': path });
-							console.log(path);
-							res.end();
-
-							return;
-						});
-					}).on('error', function(e) {
-						console.error("ERORR");
-						console.error(e);
-					});
-				});
-				return;
-			}
-			else if( p.access_token && p.path ){
-
-				// The access_token is of the format which can be decomposed
-				var token = p.access_token.match(/^([a-z]+)\:\/\/([^:]+)\:([^@]+)@(.+)$/);
-				
-				path = p.path;
-
-				console.log(token);
-
-				self.utils.findSecret( token[1], token[4], function(response){
-
-					if(typeof(response)==='function'){
-						response(res);
-						return;
-					}
-					else if(response){
-						path = oauth.sign( p.path, {
-							oauth_token: token[2],
-							oauth_consumer_key : token[4]
-						}, response, token[3], null, (p.method||req.method).toUpperCase(), p.data?JSON.parse(p.data):null);
-					}
-
-					if(req.method==='GET'&&(!p.method||p.method.toUpperCase()==='GET')){
-						// redirect the users browser to the new path
-						res.writeHead(302, { 'Access-Control-Allow-Origin':'*', 'Location': path });
-						res.end();
-					}
-					else{
-						if(p.callback){
-							path = p.callback + "('" + path + "')";
-						}
-						res.writeHead(200, { 'Access-Control-Allow-Origin':'*' });
-						res.end( path ,"utf8");
-
-						// Make the request internally and spit out the response
-						/*
-						var data = '';
-						req.on('data', function(chunk){
-							data += chunk;
-						});
-						req.on('end', function(){
-							console.log("MAKING INTERNAL " + req.method);
-							http.request({
-
-							}, function(res){
-
-							});
-						});
-						*/
-					}
-				});
-
-				return;
-			}
-
-
-			// If we have got to here then we aren't processing this request,
-			// It should be passed through.
-			passthru();
-		});
+			return;
+		}
 	};
 
 
 
 	//
-	// Trigger
-	this.events = {};
-	this.trigger = function(name, data, request, response, default_callback){
-		// Loop through all the events and trigger
-		if(name in this.events){
-			this.events[name].forEach(function(func,i){
-				func( data, request, response, default_callback );
+	// getCredentials
+	// Given a network name and a client_id, returns the client_secret
+	//
+	this.getCredentials = function(network, id, callback){
+		if(!network||!id){
+			callback(false);
+			return;
+		}
+		var p = services[network];
+		callback( typeof p.id === 'string'?p.secret:p.id[id] );
+	};
+
+
+	//
+	// OAuth 1
+	// Thi handles the OAuth1 authentication flow
+	//
+	this.loginOAuth1 = function(p,callback){
+
+		//
+		// Get the Authorization path
+		//
+		// p = self.utils.merge(services[p.network], p);
+		var	path,
+			token_secret = null;
+
+		var opts = {
+			oauth_consumer_key : p.client_id
+		};
+
+		//
+		// OAUTH 1: FIRST STEP
+		// The oauth_token has not been provisioned.
+		//
+		if(!p.oauth_token){
+
+			// Change the path to be that of the intiial handshake
+			path = p.oauth.request;
+
+			//
+			// Create the URL of this service
+			// We are building up a callback URL which we want the client to easily be able to use.
+
+			// Callback
+			var oauth_callback = p.redirect_uri + (p.redirect_uri.indexOf('?')>-1?'&':'?') + self.utils.param({
+				proxy_url : self.location.protocol + '//'+ self.location.host + self.location.pathname,
+				state     : p.state,
+				token_url : p.oauth.token,
+				network   : p.network,
+				client_id : p.client_id
+			}, function(r){
+				// Encode all the parameters
+				return encodeURIComponent(r);
 			});
+
+			// Version 1.0a requires the oauth_callback parameter for signing the request
+			if(p.oauth.version==='1.0a'){
+				// Define the OAUTH CALLBACK Parameters
+				opts.oauth_callback = oauth_callback;
+			}
+
 		}
 		else{
-			default_callback();
+
+			//
+			// OAUTH 1: Step 2
+			// The provider has provisioned a temporary token
+			//
+
+			// Change the path to be that of the Providers token exchange
+			path = p.token_url || p.oauth.token;
+
+			opts.oauth_token = p.oauth_token;
+			if(p.oauth_verifier){
+				opts.oauth_verifier = p.oauth_verifier;
+			}
+
+			// Get secret from temp storage
+			token_secret = _token_secrets[p.oauth_token];
 		}
-	};
-	this.on = function(name,callback){
-		// Loop through all the events and trigger
-		if(!(name in this.events)){
-			this.events[name] = [];
-		}
-		this.events[name].push(callback);
+
+
+		//
+		// Find the client secret
+		// Get the client secret
+		//
+		self.getCredentials( p.network, p.client_id, function(client_secret){
+
+			if(!client_secret){
+				redirect( p.redirect_uri, {
+					error : "signature_invalid",
+					error_message : "The signature is not in correct format and not recognized by our system."
+				});
+				return;
+			}
+
+			// Sign the request using the application credentials
+			var signed_url = oauth.sign( path, opts, client_secret, token_secret || null);
+
+			// Make the call
+			https.get( url.parse(signed_url), function(r){
+
+				console.log("RESPONSE"+r.statusCode);
+
+				var data = '';
+				r.on('data', function(chunk){
+					data += chunk;
+				});
+
+				r.on('end', function(){
+
+					var json = {};
+					try{
+						json = JSON.parse(data.toString());
+					}
+					catch(e){
+						json = self.utils.param(data.toString());
+					}
+
+					if(json.error||r.statusCode===401){
+
+						// Error
+						if(!json.error){
+							console.log(json);
+							json = {error:json.oauth_problem||"401 could not authenticate"};
+						}
+						callback( p.redirect_uri, json );
+					}
+					// Was this a preflight request
+					else if(!p.oauth_token){
+						// Step 1
+
+						// Store the oauth_token_secret
+						if(json.oauth_token_secret){
+							_token_secrets[json.oauth_token] = json.oauth_token_secret;
+						}
+
+						// Great redirect the user to authenticate
+						callback( p.oauth.auth + '?' + self.utils.param({
+							oauth_token : json.oauth_token,
+							oauth_callback : oauth_callback
+						}) );
+					}
+
+					else{
+						// Step 2
+						// We should now have everything we need for an access_token
+						callback( p.redirect_uri, {
+							access_token : p.network + "://" + json.oauth_token +':'+json.oauth_token_secret+'@'+p.client_id,
+							state : p.state
+						});
+					}
+
+					return;
+				});
+			}).on('error', function(e) {
+				console.error("ERORR");
+				console.error(e);
+			});
+		});
 	};
 
 
@@ -409,16 +423,7 @@ module.exports = new (function(){
 
 	this.utils = {
 
-		// Given the network name and the id, lets get the secret
-		findSecret : function(network, id, callback){
-			if(!network||!id){
-				callback(false);
-				return;
-			}
-			var p = _services[network];
-			callback( typeof p.id === 'string'?p.secret:p.id[id] );
-		},
-
+		// Log activity
 		log : function(p){
 			console.log(p);
 		},

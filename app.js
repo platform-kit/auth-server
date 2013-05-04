@@ -8,39 +8,82 @@ var port=process.env.PORT || 5500;
 //
 // Initiate the database
 //
-var pg = require('pg');
-var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL||"tcp://postgres:root@localhost/postgres";
-var client = new pg.Client(conn);
-client.connect();
-console.log("Connected to POSTGRESQL " + conn);
+var db = require('./db.js');
+db.table = "apps";
+/*
+CREATE TABLE apps (
+	service VARCHAR(40) NOT NULL,
+	client_id VARCHAR(2000) NOT NULL,
+	client_secret VARCHAR(2000) NOT NULL,
+	admin_id VARCHAR(2000) NOT NULL,
+	guid VARCHAR UNIQUE DEFAULT MD5(CAST(RANDOM() AS VARCHAR)),
+	PRIMARY KEY(service, client_id)
+);
+
+ALTER TABLE apps ADD COLUMN guid VARCHAR UNIQUE DEFAULT MD5(CAST(RANDOM() AS VARCHAR));
+
+heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL
+*/
+
 
 
 //
 // Connect to the http server
+// Serve static content from the BIN directory
 //
-var app = connect().use( connect.static( __dirname + '/bin') );
+var app = connect().use(
+	connect.static( __dirname + '/bin')
+);
+
+console.log("HTTP server listening on port "+ port);
+app.listen(port);
+
+
+//
+// Listen out for REST API access
+// Serve the database
+//
 app.use("/rest", function(req,res){
-	// Function
-	var location = url.parse(req.url);
+
+	//
+	// CORS
+	// Handle each API response with some cross domain headers
+	res.writeHead(200, {
+		'Content-Type': 'application/json',
+		'Access-Control-Allow-Origin' : '*',
+		'Access-Control-Allow-Methods' : 'OPTIONS,GET,POST,PUT,DELETE',
+		"Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept"
+	});
+
+	//
+	// Did the user use JSONP?
+	// Get the callback parameter with the request
 	rest(req, function(response){
-		var qs = hello.utils.param(location.search||'');
+
+		//
+		// Return JSON
 		var body = JSON.stringify(response);
+
+		//
+		// Does the request ask for JSONP response?
+		// Get the callback parameter with the request
+		var location = url.parse(req.url);
+		var qs = hello.utils.param(location.search||'');
 		if(qs&&qs.callback){
 			body = qs.callback + "(" + body + ")";
 		}
-		res.writeHead(200, { 'Content-Type': 'application/json' });
+
+		// Finally, respond
 		res.end(body, 'utf-8');
-		return;
 	});
-
-	return;
 });
-app.listen(port);
-
-console.log("HTTP server listening on port "+ port);
 
 
 
+//
+// REST API
+// The REST API serves the interface for getting and saving application data
+//
 function rest(req, callback){
 
 	// QueryString
@@ -56,71 +99,73 @@ function rest(req, callback){
 			});
 
 			req.on('end', function() {
-				callback( hello.utils.param(body) );
+				try{
+					body = JSON.parse(body);
+				}
+				catch(e){
+					hello.utils.param(body);
+				}
+				callback( req.method, body );
 			});
 		}
 		else{
-			callback(null);
+			callback(req.method, null);
 		}
 	};
 
 	// Get the data
-	getData(function(data){
+	getData(function(method, data){
 
-		if( !data || !data.network||!data.client_id||!data.client_secret||!data.admin_id){
-			callback({
-				error : "Missing data"
-			});
+		// Get request
+		if(data===null){
+
+			if(qs.action==='delete'){
+				db.delete({guid : qs.guid}, function(err,result){
+					callback.apply(null,err);
+				});
+				return;
+			}
+
+			// Ensure we have identifed the user
+			if(!qs.access_token||!qs.admin_id){
+				callback({
+					error : "access_token and user id required"
+				});
+				return;
+			}
+			// @todo check that the access_token belongs to the user
+
+			// Get the apps that they have registered
+			db.query('SELECT * FROM apps ' +
+				'WHERE admin_id SIMILAR TO $1',
+				['%\\m'+qs.admin_id+'\\M%'],
+				function(err,result){
+					callback(result);
+				});
+
 			return;
+
+		// POST
 		}
+		else{
+			
+			if( !data.guid ){
 
-		// Data
-		console.log(data);
-		// Get all the current stored credentials
+				db.insert( data, function(err,result){
+					console.log(err||result.rows[0]);
+					callback.call(null,err||result.rows[0]);
+				});
 
-		client.query('SELECT admin_id FROM apps '+
-			'WHERE service = $1 AND client_id = $2 LIMIT 1',
-			[data.network, data.client_id],
-			function(err,result){
+				return;
+			}
+			else{
+				db.update( data, {guid:data.guid}, function(err,result){
 
-				console.log(err);
-				console.log(result);
+					callback.call(null,result);
+				});
+			}
 
-				console.log(result.rows[0]);
-
-				if(result.rows.length){
-					//Callback
-					if( result.rows[0].admin_id !== data.admin_id ){
-						callback({
-							error : "This client id is associated with another user"
-						});
-					}
-					else{
-						client.query('UPDATE apps SET client_secret = $3 '+
-							'WHERE service = $1 AND client_id = $2 AND admin_id = $4 LIMIT 1',
-							[data.network, data.client_id, data.client_secret, data.admin_id ],
-							function(err,result){
-								console.log(err);
-								console.log(result);
-								callback({
-									success : "updated"
-								});
-							});
-					}
-				}
-				else{
-					client.query('INSERT INTO apps (service, client_id, client_secret, admin_id) '+
-						'VALUES($1,$2,$3,$4)',
-						[data.network, data.client_id, data.client_secret, data.admin_id ],
-						function(err,result){
-							console.log(err);
-							console.log(result);
-							callback({
-								success : "added"
-							});
-						});
-				}
-			});
+		}
 	});
 }
 
@@ -128,139 +173,55 @@ function rest(req, callback){
 // HelloJS
 //
 
-/*
-
-CREATE TABLE apps (
-	service VARCHAR(40),
-	client_id VARCHAR(2000),
-	client_secret VARCHAR(2000),
-	admin_id VARCHAR(2000),
-	PRIMARY KEY(service, client_id)
-);
-
-INSERT INTO apps (service,client_id,client_secret,admin_id) VALUES
-('google', '656984324806-sr0q9vq78tlna4hvhlmcgp2bs2ut8uj8.apps.googleusercontent.com', '-Rc8AL6ZnElTVNq-c9fq9VCH', '' ),
-('facebook', '160981280706879', '8a9422bf1d21f7da38e1c9c8492fce40',''),
-('facebook', '285836944766385', 'c2d820f98e0b7c71bfafead78f2df93e', ''),
-('windows', '00000000400D8578', 'Ik8X3-4ilTiWS-0FD7AkmoHowEqpcXpf',''),
-('windows', '000000004405FD31', 'eowTGubQjjlUz63HRclYokptkyG9UySe', ''),
-('linkedin', 'exgsps7wo5o7', 'IfAo0uPQwUZ2Kz5o',''),
-('github', '7211c5844bdee0247d35', 'e4f03896f58ed140b3c405db3ef67c4fdc932f8f',''),
-('github', 'ca7e06a718b2e8eef737', '23d1128fefc919cb004d17249a8f41f77744502c', ''),
-('soundcloud','8a4a19f86cdab097fa71a15ab26a01d6', 'e2f1560184003a1cdd8b5bf7c7098e38',''),
-('foursquare','3HEXMBQVH2SV0VXUKXOGQRPWH1PUTEIZN4KBDY5L54ZDXCDP', 'N1THQU4WP3G2TRWWNHGNFBUQBUMRMK1R5TG2UTGO2TWVDANB',''),
-('flickr', '46dfea40b0f9d3765bc598966b5955d3', 'b16267f09e065859',''),
-('twitter', 'eQuyZuECKWPiv3D7E4qdg', 'CnZITQsUKgs8BSUWeKAeQ2QSlIOmKlfDTk8QTLHaY',''),
-('twitter', 'SXpuxbSUvgWBhiDfsorsWQ', 'VzbIBESv49WqbG8xExk4BYZFoYO7ZEnFp6yc7mAxQ',''),
-('yahoo','dj0yJmk9TTNoTWV6eE5ObW5NJmQ9WVdrOWVtSmhVbk5pTm1VbWNHbzlNVFUxT0RNeU16UTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0yZQ--', '0b79c0a40970abcc2ba15d5bf9edafbbf466dfc7',''),
-('dropbox','t5s644xtv7n4oth', 'h9b3uri43axnaid', ''),
-('paypal', '07cf80b1a9ad571263c80a5ab81b745f', '2bef3cdcfd799f77','')
-;
-
-*/
-
-/*
-hello.init({
-	'google' : {id:{
-		'656984324806-sr0q9vq78tlna4hvhlmcgp2bs2ut8uj8.apps.googleusercontent.com' : '-Rc8AL6ZnElTVNq-c9fq9VCH'
-	}},
-	'facebook' : {id:{
-		// 'adodson.com',
-		'160981280706879' : '8a9422bf1d21f7da38e1c9c8492fce40',
-		//'local.knarly.com'
-		'285836944766385' :'c2d820f98e0b7c71bfafead78f2df93e'
-	}},
-	'windows' : {id:{
-		// 'adodson.com'
-		'00000000400D8578' :'Ik8X3-4ilTiWS-0FD7AkmoHowEqpcXpf',
-		//'local.knarly.com'
-		'000000004405FD31' :'eowTGubQjjlUz63HRclYokptkyG9UySe'
-	}},
-	'linkedin' : {id:{
-		// 'local.knarly.com'
-		'exgsps7wo5o7' :'IfAo0uPQwUZ2Kz5o'
-	}},
-
-	'github' : {id:{
-		// 'adodson.com'
-		'7211c5844bdee0247d35' : 'e4f03896f58ed140b3c405db3ef67c4fdc932f8f',
-		//'local.knarly.com'
-		'ca7e06a718b2e8eef737' : '23d1128fefc919cb004d17249a8f41f77744502c'
-	}},
-	'soundcloud' : {id:{
-		'8a4a19f86cdab097fa71a15ab26a01d6' : 'e2f1560184003a1cdd8b5bf7c7098e38'
-	}},
-	'foursquare' : {id:{
-		'3HEXMBQVH2SV0VXUKXOGQRPWH1PUTEIZN4KBDY5L54ZDXCDP' : 'N1THQU4WP3G2TRWWNHGNFBUQBUMRMK1R5TG2UTGO2TWVDANB'
-	}},
-	'flickr' : {id:{
-		'46dfea40b0f9d3765bc598966b5955d3' : 'b16267f09e065859'
-	}},
-	'twitter' : {id:{
-		// 'adodson.com'
-		'eQuyZuECKWPiv3D7E4qdg' : 'CnZITQsUKgs8BSUWeKAeQ2QSlIOmKlfDTk8QTLHaY',
-		//'local.knarly.com'
-		'SXpuxbSUvgWBhiDfsorsWQ' : 'VzbIBESv49WqbG8xExk4BYZFoYO7ZEnFp6yc7mAxQ'
-	}},
-	'yahoo' : {id:{
-		'dj0yJmk9TTNoTWV6eE5ObW5NJmQ9WVdrOWVtSmhVbk5pTm1VbWNHbzlNVFUxT0RNeU16UTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0yZQ--' : '0b79c0a40970abcc2ba15d5bf9edafbbf466dfc7'
-	}},
-	'dropbox' : {id:{
-		't5s644xtv7n4oth' : 'h9b3uri43axnaid'
-	}},
-	'paypal' : {id:{
-		'07cf80b1a9ad571263c80a5ab81b745f' : '2bef3cdcfd799f77'
-	}}
-});
-*/
-
 
 //
 // Listen for auth calls
 // Listen to incoming responses to the path proxy
-hello.listen(app,'/proxy');
+//
+app.use('/proxy', hello.request );
 
-// Override the exception
-hello.on('oauth.exception', function(data,request,response,default_callback){
-	var json = {
-		client_id : data.query.client_id,
-		network : data.query.network,
-		error : data.error
-	};
-	response.writeHead(302, { 'Location': "/#"+hello.utils.param(json) });
-	response.end();
-});
+// If use native clientServer use listen
+// e.g. hello.listen(app,'/proxy');
+
+//
+// Override redirection
+//
+hello.interceptRedirect = function(path,hash){
+	if(hash && "error" in hash ){
+		switch(hash.error){
+			case "consumer_key_unknown" :
+				hash.error_message = "Please check your application id and settings locally and at https//auth-server.herokuapp.com";
+			break;
+			case "signature_invalid" :
+				hash.error_message = "Your application needs to be registered at https//auth-server.herokuapp.com";
+			break;
+		}
+	}
+};
 
 
 //
-// Override the find a secret method, because this is stored in a database
-// Look up the secret from a database
-hello.utils.findSecret = function(network,id,callback){
+// Override the credentials access
+// Return the secret from a database
+hello.getCredentials = function(network,id,callback){
 
+	// No Credentials?
+	// Retrun NULL, and accept default handling
 	if(!network||!id){
 		callback(null);
+		return;
 	}
 
+	//
+	// Search the database
 	// Get all the current stored credentials
-	var query = client.query('SELECT client_secret FROM apps '+
-		'WHERE client_id = $1 AND service = $2 LIMIT 1',
+	//
+	db.query('SELECT client_secret FROM apps WHERE client_id = $1 AND service = $2 LIMIT 1',
 		[id, network],
 		function(err,result){
-			console.log("PANTS");
-			if(result.rows.length){
-				//Callback
-				callback( result.rows[0].client_secret );
-			}
-			else{
-				// So... we haven't found the ID,
-				callback(function(res){
-					// res
-					res.writeHead(302, { 'Location': "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id) });
-					res.end();
-				});
-			}
 
-			// End
-//				pg.end();
+			//Callback
+			// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
+			callback( result.rows.length ? result.rows[0].client_secret : null );
 		});
 };
