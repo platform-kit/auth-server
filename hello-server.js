@@ -165,7 +165,7 @@ module.exports = new (function(){
 
 			res.writeHead(302, {
 				'Access-Control-Allow-Origin':'*',
-				'Location': path + (hash ? '#'+ self.utils.param( hash ) : null) } );
+				'Location': path + (hash ? '#'+ self.utils.param( hash ) : '') } );
 			res.end();
 		}
 
@@ -230,6 +230,7 @@ module.exports = new (function(){
 						oauth_token: token[2],
 						oauth_consumer_key : token[4]
 					}, client_secret, token[3], null, (p.method||req.method).toUpperCase(), p.data?JSON.parse(p.data):null);
+
 				}
 
 				if(req.method==='GET'&&(!p.method||p.method.toUpperCase()==='GET')){
