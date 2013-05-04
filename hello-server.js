@@ -301,7 +301,7 @@ module.exports = new (function(){
 			});
 
 			// Version 1.0a requires the oauth_callback parameter for signing the request
-			if( (o.version || p.oauth.version ) ==='1.0a'){
+			if( (p.version || p.oauth.version ) ==='1.0a'){
 				// Define the OAUTH CALLBACK Parameters
 				opts.oauth_callback = oauth_callback;
 			}
