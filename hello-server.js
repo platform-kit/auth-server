@@ -337,7 +337,7 @@ module.exports = new (function(){
 		self.getCredentials( p.network, p.client_id, function(client_secret){
 
 			if(!client_secret){
-				redirect( p.redirect_uri, {
+				callback( p.redirect_uri, {
 					error : "signature_invalid",
 					error_message : "The signature is not in correct format and not recognized by our system."
 				});
