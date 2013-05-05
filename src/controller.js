@@ -6,7 +6,7 @@ function controller($scope,$filter,$http) {
 	var server = "http://localhost:5500";
 
 	// Fields
-	$scope.fields = ['service', 'client_id', 'client_secret'];
+	$scope.fields = ['reference', 'domain', 'client_id', 'client_secret'];
 
 	// Apps
 	// A list of the users currently registered apps
@@ -56,10 +56,12 @@ function controller($scope,$filter,$http) {
 		}).success(function(response){
 
 			// Update the guid to the app in memory
-			if(!response.guid){
-				alert("Insert failed");
+			if(!app.guid&&!response.guid){
 				console.error(response);
 				return;
+			}
+			else{
+				alert("Successfully updated records");
 			}
 			app.guid = response.guid;
 
@@ -155,7 +157,7 @@ function controller($scope,$filter,$http) {
 								}
 							}
 							if(b){
-								$scope.apps.push(response.rows[i]);					
+								$scope.apps.push(response.rows[i]);
 							}
 						}
 

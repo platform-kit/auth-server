@@ -12,15 +12,14 @@ var db = require('./db.js');
 db.table = "apps";
 /*
 CREATE TABLE apps (
-	service VARCHAR(40) NOT NULL,
+	reference VARCHAR(40),
+	domain VARCHAR,
 	client_id VARCHAR(2000) NOT NULL,
 	client_secret VARCHAR(2000) NOT NULL,
 	admin_id VARCHAR(2000) NOT NULL,
 	guid VARCHAR UNIQUE DEFAULT MD5(CAST(RANDOM() AS VARCHAR)),
 	PRIMARY KEY(service, client_id)
 );
-
-ALTER TABLE apps ADD COLUMN guid VARCHAR UNIQUE DEFAULT MD5(CAST(RANDOM() AS VARCHAR));
 
 heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL
 */

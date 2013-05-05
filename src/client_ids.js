@@ -29,4 +29,4 @@ var CLIENT_IDS = {
 
 var REDIRECT_URI = {
 	'local.knarly.com' : '/hello.js/redirect.html'
-}[window.location.hostname] || './redirect.html';
+}[window.location.host] || './redirect.html';

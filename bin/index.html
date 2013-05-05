@@ -317,7 +317,7 @@ var CLIENT_IDS = {
 
 var REDIRECT_URI = {
 	'local.knarly.com' : '/hello.js/redirect.html'
-}[window.location.hostname] || './redirect.html';</script>
+}[window.location.host] || './redirect.html';</script>
 <script>
 //
 // Angular Controller
@@ -326,7 +326,7 @@ function controller($scope,$filter,$http) {
 	var server = "";
 
 	// Fields
-	$scope.fields = ['service', 'client_id', 'client_secret'];
+	$scope.fields = ['reference', 'domain', 'client_id', 'client_secret'];
 
 	// Apps
 	// A list of the users currently registered apps
@@ -376,10 +376,12 @@ function controller($scope,$filter,$http) {
 		}).success(function(response){
 
 			// Update the guid to the app in memory
-			if(!response.guid){
-				alert("Insert failed");
+			if(!app.guid&&!response.guid){
 				console.error(response);
 				return;
+			}
+			else{
+				alert("Successfully updated records");
 			}
 			app.guid = response.guid;
 
@@ -475,7 +477,7 @@ function controller($scope,$filter,$http) {
 								}
 							}
 							if(b){
-								$scope.apps.push(response.rows[i]);					
+								$scope.apps.push(response.rows[i]);
 							}
 						}
 
@@ -1113,7 +1115,7 @@ table.apps td{
 	text-overflow:ellipsis;
 }
 </style>
-<title>HelloJS Server</title>
+<title>// Auth Server</title>
 <body ng-controller="controller">
 <h1>// auth-server</h1>
 <blockquote>
