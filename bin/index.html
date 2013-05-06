@@ -173,7 +173,11 @@
 			for(var i=0;i<headings.length;i++){
 				var tag = headings[i],
 					text = (tag.innerText||tag.innerHTML),
-					ref = text.replace(/\W/ig,'');
+					ref = tag.getElementsByTagName('a')[0];
+
+				if(ref){
+					ref = ref.getAttribute('href').replace(/^#/,'');
+				}
 
 
 				var t = findPos(tag)[1] + 100,
@@ -690,6 +694,7 @@ a{
 a.anchor{
 	position: relative;
 	text-indent: 0;
+	text-decoration: none;
 }
 
 h1:hover a.anchor:before,
@@ -1119,7 +1124,7 @@ table.apps td{
 <body ng-controller="controller">
 <h1>// auth-server</h1>
 <blockquote>
-<p>//auth-server provides a "shim" service for clientside web apps adopting serverside OAuth2 and OAuth1 authentication. 
+<p>// auth-server provides a "shim" service for clientside web apps adopting serverside OAuth2 and OAuth1 authentication. 
 </blockquote>
 
 <h2>Why</h2>
@@ -1188,7 +1193,7 @@ table.apps td{
 </pre>
 
 
-<h3>Authentication OAuth 1.0</h3>
+<h3>Authentication OAuth 1.0 &amp; 1.0a</h3>
 
 <p>OAuth 1.0 has a number of steps so forgive the verbosity here. An app is required to make an initial request to the //auth-server, which in-turn initiates the authentication flow.</p>
 

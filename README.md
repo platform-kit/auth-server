@@ -1,6 +1,6 @@
 # // auth-server
 
-//auth-server provides a "shim" service for clientside web apps adopting serverside OAuth2 and OAuth1 authentication. 
+// auth-server provides a "shim" service for clientside web apps adopting serverside OAuth2 and OAuth1 authentication. 
 
 
 ## Why
@@ -37,7 +37,7 @@ The client will be redirected back to the location of [REDIRECT_PATH], with the 
 
 
 
-### Authentication OAuth 1.0
+### Authentication OAuth 1.0 &amp; 1.0a
 
 OAuth 1.0 has a number of steps so forgive the verbosity here. An app is required to make an initial request to the //auth-server, which in-turn initiates the authentication flow.
 
