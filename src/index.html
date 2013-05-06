@@ -20,12 +20,16 @@ table.apps td{
 <body ng-controller="controller">
 <h1>// auth-server</h1>
 <blockquote>
-<p>//auth-server provides a "shim" service for web apps or browser extensions wanting to take advantage of OAuth2 and OAuth1 server side authentication in their static apps.
+<p>//auth-server provides a "shim" service for clientside web apps adopting serverside OAuth2 and OAuth1 authentication. 
 </blockquote>
+
+<h2>Why</h2>
+
+<p>Alot of legacy API's dont provide client side authentication, which only came about with the introduction of OAuth2. Still popular API's like Twitter, Dropbox and Yahoo require this server-to-server authentication paradigm. What //auth-server does is abstract this authentication away to a service on the web. So that clientside libraries like <a href="http://adodson.com/hello.js">HelloJS</a> can be dropped into a web page and will just work.</p>
 
 <h2>Developers</h2>
 
-<p>The <a href="http://adodson.com/hello.js">HelloJS</a> client side library supports this service by default. You dont need to read the docs here just register <a href='https://auth-server.herokuapp.com/#my-apps'>your app ids</a>.</p>
+<p>The <a href="http://adodson.com/hello.js">HelloJS</a> client side library supports this service by default. You dont need to read the docs here just <a href='https://auth-server.herokuapp.com/#my-apps'>register your app ids</a>.</p>
 <p>However if your writing your own client side code then the <a href="#documentation">documentation</a> below should help you get started.</p>
 
 <!--NO-MARKDOWN-->
@@ -70,18 +74,18 @@ table.apps td{
 <p>The OAuth2 flow starts when your application sends a client out to a providers site to grant permissions. The response is an authorization code "[AUTH_CODE]" which is returned to your site, this needs to be exchanged for an Access Token. Your page then needs to send this code to the //auth-server with your client_id in exhchange for an access token, e.g.</p>
 
 <pre>
-https://auth-server.herokuapp.com/proxy
-?redirect_uri=[REDIRECT_PATH]
-&code=[AUTH_CODE]
-&client_id=[APP_KEY]
-&state=[STATE]
-&grant_url=[PROVIDERS_OAUTH2_GRANT_URL]
+	https://auth-server.herokuapp.com/proxy
+	?redirect_uri=[REDIRECT_PATH]
+	&code=[AUTH_CODE]
+	&client_id=[APP_KEY]
+	&state=[STATE]
+	&grant_url=[PROVIDERS_OAUTH2_GRANT_URL]
 </pre>
 
 <p>The client will be redirected back to the location of [REDIRECT_PATH], with the contents of the server response as well as whatever was defined in the [STATE] in the hash. e.g...
 
 <pre>
-[REDIRECT_PATH]#state=[STATE]&access_token=ABCD1233234&expires=123123123
+	[REDIRECT_PATH]#state=[STATE]&access_token=ABCD1233234&expires=123123123
 </pre>
 
 
@@ -90,13 +94,13 @@ https://auth-server.herokuapp.com/proxy
 <p>OAuth 1.0 has a number of steps so forgive the verbosity here. An app is required to make an initial request to the //auth-server, which in-turn initiates the authentication flow.</p>
 
 <pre>
-https://auth-server.herokuapp.com/proxy
-?redirect_uri=[REDIRECT_PATH]
-&client_id=[APP_KEY]
-&request_url=[OAUTH_REQUEST_TOKEN_URL]
-&auth_url=[OAUTH_AUTHORIZATION_URL]
-&token_url=[OAUTH_TOKEN_URL]
-&state=[STATE]
+	https://auth-server.herokuapp.com/proxy
+	?redirect_uri=[REDIRECT_PATH]
+	&client_id=[APP_KEY]
+	&request_url=[OAUTH_REQUEST_TOKEN_URL]
+	&auth_url=[OAUTH_AUTHORIZATION_URL]
+	&token_url=[OAUTH_TOKEN_URL]
+	&state=[STATE]
 </pre>
 
 <p>//auth-server signs the client request and redirects the user to the providers login page defined by [OAUTH_AUTHRIZATION_URL].</p>
@@ -106,28 +110,28 @@ https://auth-server.herokuapp.com/proxy
 <p>The provider should have included an oauth_callback parameter which was defined by //auth-server, this includes part of the path where the token can be returned for an access token. The total path response shall look something like this.</p>
 
 <pre>
-[REDIRECT_PATH]
-?state=[STATE]
-&proxy_url=https://auth-server.herokuapp.com/proxy
-&client_id=[APP_KEY]
-&token_url=[OAUTH_TOKEN_URL]
-&oauth_token=abc12465
+	[REDIRECT_PATH]
+	?state=[STATE]
+	&proxy_url=https://auth-server.herokuapp.com/proxy
+	&client_id=[APP_KEY]
+	&token_url=[OAUTH_TOKEN_URL]
+	&oauth_token=abc12465
 </pre>
 
 <p>The page you defined locally as the [REDIRECT_PATH], must then construct a call to //auth-server to exchange the unauthorized oauth_token for an access token. This would look like this...</p>
 
 <pre>
-https://auth-server.herokuapp.com/proxy
-?oauth_token=abc12465
-&redirect_uri=[REDIRECT_PATH]
-&client_id=[APP_KEY]
-&state=[STATE]
-&token_url=[OAUTH_TOKEN_URL]
+	https://auth-server.herokuapp.com/proxy
+	?oauth_token=abc12465
+	&redirect_uri=[REDIRECT_PATH]
+	&client_id=[APP_KEY]
+	&state=[STATE]
+	&token_url=[OAUTH_TOKEN_URL]
 </pre>
 
 </p>Finally the //auth-server returns the access_token to your redirect path and its the responsibility of your script to store this in the client in order to make subsequent API calls.</p>
 <pre>
-[REDIRECT_PATH]#state=[STATE]&access_token=ABCD1233234&expires=123123123
+	[REDIRECT_PATH]#state=[STATE]&access_token=ABCD1233234&expires=123123123
 </pre>
 
 <p>This access token still needs to be signed via //auth-server every time an API request is made - read on...</p>
@@ -139,11 +143,11 @@ https://auth-server.herokuapp.com/proxy
 <p>To sign a request to [API_PATH], use the [access_token] returned in OAuth 1.0 above and send to the auth-server</p> 
 
 <pre>
-https://auth-server.herokuapp.com/proxy?access_code=[ACCESS_CODE]&path=[API_PATH]
+	https://auth-server.herokuapp.com/proxy?access_code=[ACCESS_CODE]&path=[API_PATH]
 </pre>
 <p>The response redirects the requests to the [API_PATH] and signs it for you. e.g.</p>
 <pre>
-[API_PATH]?oauth_token=asdf&oauth_consumer_key=asdf&...&oauth_signature=1234
+	[API_PATH]?oauth_token=asdf&oauth_consumer_key=asdf&...&oauth_signature=1234
 </pre>
 
 <p>Yes its a nightmare which fortunatly OAuth2 has addressed</p>

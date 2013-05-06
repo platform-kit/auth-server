@@ -1,11 +1,15 @@
 # // auth-server
 
-//auth-server provides a "shim" service for web apps or browser extensions wanting to take advantage of OAuth2 and OAuth1 server side authentication in their static apps.
+//auth-server provides a "shim" service for clientside web apps adopting serverside OAuth2 and OAuth1 authentication. 
 
+
+## Why
+
+Alot of legacy API's dont provide client side authentication, which only came about with the introduction of OAuth2. Still popular API's like Twitter, Dropbox and Yahoo require this server-to-server authentication paradigm. What //auth-server does is abstract this authentication away to a service on the web. So that clientside libraries like [HelloJS](http://adodson.com/hello.js) can be dropped into a web page and will just work.
 
 ## Developers
 
-The [HelloJS](http://adodson.com/hello.js) client side library supports this service by default. You dont need to read the docs here just register [your app ids](https://auth-server.herokuapp.com/#my-apps).
+The [HelloJS](http://adodson.com/hello.js) client side library supports this service by default. You dont need to read the docs here just [register your app ids](https://auth-server.herokuapp.com/#my-apps).
 However if your writing your own client side code then the [documentation](#documentation) below should help you get started.
 
 
