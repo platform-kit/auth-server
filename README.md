@@ -5,7 +5,7 @@
 
 ## Why
 
-Alot of legacy API's dont provide client side authentication, which only came about with the introduction of OAuth2. Still popular API's like Twitter, Dropbox and Yahoo require this server-to-server authentication paradigm. What //auth-server does is abstract this authentication away to an online service at [https://auth-server.herokuapp.com](https://auth-server.herokuapp.com). So that clientside libraries like [HelloJS](http://adodson.com/hello.js) can be dropped into a web page and will just work.
+A lot of legacy API's dont provide client side authentication, which only came about with the introduction of OAuth2. Still popular API's like Twitter, Dropbox and Yahoo require this server-to-server authentication paradigm. What //auth-server does is abstract this authentication away to an online service at [https://auth-server.herokuapp.com](https://auth-server.herokuapp.com). So that clientside libraries like [HelloJS](http://adodson.com/hello.js) can be dropped into a web page and will just work.
 
 ## Developers
 
