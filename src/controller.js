@@ -15,8 +15,8 @@ function controller($scope,$filter,$http) {
 		$scope.apps.push({
 			client_id : '',
 			client_secret : '',
-			admin_id : getAdmins().join(' '),
-			service : ''
+			admin_id : getAdmins().join(' ')
+//			service : ''
 		});
 		$scope.$apply();
 	};

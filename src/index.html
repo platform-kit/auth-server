@@ -15,6 +15,15 @@ table.apps td{
 	overflow: hidden;
 	text-overflow:ellipsis;
 }
+table.apps td textarea{
+	width:100%;
+	height:100%;
+	border:none;
+	background:transparent;
+	font-family: inherit;
+	font-size:1rem;
+}
+
 </style>
 <title>// Auth Server</title>
 <body ng-controller="controller">
@@ -54,7 +63,7 @@ table.apps td{
 	<thead>
 	<tbody>
 		<tr ng-repeat="item in apps">
-			<td ng-repeat="name in fields" ng-model="item[name]" contenteditable="true" ></td>
+			<td ng-repeat="name in fields"><textarea ng-model="item[name]"></textarea></td>
 			<td><button ng-click="postApp(item)">Save</button> <button ng-click="deleteApp(item)">Delete</button></td>
 		</tr>
 	<tbody>
