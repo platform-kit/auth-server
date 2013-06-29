@@ -53,16 +53,16 @@ module.exports = new (function(){
 				redirect_uri : encodeURIComponent(p.redirect_uri)
 			}, function(r){return r;});
 
-			var opts = url.parse( p.grant_url || p.oauth.grant );
-			opts.method = 'POST';
-			opts.headers = {
+			var request = url.parse( p.grant_url || p.oauth.grant );
+			request.method = 'POST';
+			request.headers = {
 				'Content-length': post.length,
 				'Content-type':'application/x-www-form-urlencoded'
 			};
 
 			//opts.body = post;
 
-			var req = https.request( opts, function(res){
+			var req = ( request.protocol==='https' ? https : http ).request( request, function(res){
 
 				var bits = "";
 				res.on('data', function (chunk) {
@@ -344,8 +344,11 @@ module.exports = new (function(){
 			// Sign the request using the application credentials
 			var signed_url = oauth.sign( path, opts, client_secret, token_secret || null);
 
+			// Requst
+			var request = url.parse(signed_url);
+
 			// Make the call
-			https.get( url.parse(signed_url), function(r){
+			( request.protocol==='https:' ? https : http ).get( request, function(r){
 
 				console.log("RESPONSE"+r.statusCode);
 
@@ -383,7 +386,8 @@ module.exports = new (function(){
 						}
 
 						// Great redirect the user to authenticate
-						callback( (p.auth_url||p.oauth.auth) + '?' + self.utils.param({
+						var url = (p.auth_url||p.oauth.auth);
+						callback( url + (url.indexOf('?')>-1?'&':'?') + self.utils.param({
 							oauth_token : json.oauth_token,
 							oauth_callback : oauth_callback
 						}) );
