@@ -244,6 +244,9 @@ module.exports = new (function(){
 
 			return;
 		}
+		else{
+			redirect(p.path);
+		}
 	};
 
 
