@@ -1,10 +1,16 @@
 {
-  "name": "HelloJS",
+  "name": "oauthshim",
   "version": "0.0.2",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
   	"pg": "0.6.15",
   	"crypto" : "0.0.3",
   	"connect" : "2.7.x"
+  },
+  "devDependencies" : {
+    "shunt" : "*"
   },
   "engines": {
     "node": "0.8.x"

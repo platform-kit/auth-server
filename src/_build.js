@@ -1,4 +1,4 @@
-// App.build.js
+// _build.js
 // Put this in the build package of Sublime Text 2
 /*
 {
@@ -10,22 +10,26 @@
 
 // The build script creates an index.html file and embeds style and script references inside the code.
 // Require IO operations
-var buildDist = require('../../_packages/buildDist.js');
+var shunt = require('shunt');
 
-buildDist({
+shunt({
 	'../bin/index.html' : 'index.html',
 	'../bin/redirect.html' : 'redirect.html',
 	'../README.md' : 'index.html'
 }, {
-	// We want to embed all scripts into the HTML document?	// embed : true,
+	// Embed all scripts into the HTML document?	// embed : true,
 	embed : true,
 
 	// No, this will break Angular code, which relies on $args
 	minify : false,
 
 	// This is the root directory on the local filesystem where root referenced scripts can be found.
+	// For instance, <script src="/vendor/jquery.js"></script> existed, and was pointing to a file outside this project*
+	// (*you might do this if you have a lot of projects)
+	// Then this is the full path to the web root.
 	root_dir : "D:/Projects/",
 
+	// Replace the text
 	replace : {
 		'http://localhost:5500' : '',
 		'/_packages/angular.min.js' : 'https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js'
