@@ -1,6 +1,6 @@
 var url = require('url');
 var connect = require('connect');
-var hello = require('./hello-server.js');
+var oauthshim = require('oauth-shim');
 
 var port=process.env.PORT || 5500;
 
@@ -67,7 +67,7 @@ app.use("/rest", function(req,res){
 		// Does the request ask for JSONP response?
 		// Get the callback parameter with the request
 		var location = url.parse(req.url);
-		var qs = hello.utils.param(location.search||'');
+		var qs = oauthshim.utils.param(location.search||'');
 		if(qs&&qs.callback){
 			body = qs.callback + "(" + body + ")";
 		}
@@ -87,7 +87,7 @@ function rest(req, callback){
 
 	// QueryString
 	var location = url.parse(req.url);
-	var qs = hello.utils.param(location.search||'');
+	var qs = oauthshim.utils.param(location.search||'');
 
 	// Get POST body
 	var getData = function(callback){
@@ -102,7 +102,7 @@ function rest(req, callback){
 					body = JSON.parse(body);
 				}
 				catch(e){
-					hello.utils.param(body);
+					oauthshim.utils.param(body);
 				}
 				callback( req.method, body );
 			});
@@ -177,15 +177,15 @@ function rest(req, callback){
 // Listen for auth calls
 // Listen to incoming responses to the path proxy
 //
-app.use('/proxy', hello.request );
+app.use('/proxy', oauthshim.request );
 
 // If use native clientServer use listen
-// e.g. hello.listen(app,'/proxy');
+// e.g. oauthshim.listen(app,'/proxy');
 
 //
 // Override redirection
 //
-hello.interceptRedirect = function(path,hash){
+oauthshim.interceptRedirect = function(path,hash){
 	if(hash && "error" in hash ){
 		switch(hash.error){
 			case "consumer_key_unknown" :
@@ -202,7 +202,7 @@ hello.interceptRedirect = function(path,hash){
 //
 // Override the credentials access
 // Return the secret from a database
-hello.getCredentials = function(id,callback){
+oauthshim.getCredentials = function(id,callback){
 
 	// No Credentials?
 	// Retrun NULL, and accept default handling

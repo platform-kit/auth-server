@@ -27,7 +27,7 @@ shunt({
 	// For instance, <script src="/vendor/jquery.js"></script> existed, and was pointing to a file outside this project*
 	// (*you might do this if you have a lot of projects)
 	// Then this is the full path to the web root.
-	root_dir : "D:/Projects/",
+	root_dir : "../../",
 
 	// Replace the text
 	replace : {
