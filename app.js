@@ -1,6 +1,6 @@
 var url = require('url');
 var connect = require('connect');
-var oauthshim = require('oauth-shim');
+var oauthshim = require('../node-oauth-shim/index');
 
 var port=process.env.PORT || 5500;
 
