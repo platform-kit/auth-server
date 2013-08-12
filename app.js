@@ -10,6 +10,7 @@ var port=process.env.PORT || 5500;
 //
 var db = require('./db.js');
 db.table = "apps";
+
 /*
 CREATE TABLE apps (
 	reference VARCHAR(40),
@@ -24,7 +25,7 @@ CREATE TABLE apps (
 heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL
 */
 
-
+oauthshim.debug = true;
 
 //
 // Connect to the http server
