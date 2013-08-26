@@ -7,7 +7,7 @@
   "dependencies": {
   	"pg": "0.6.15",
   	"connect" : "2.7.x",
-    "oauth-shim" : ">=0.0.3"
+    "oauth-shim" : ">=0.0.5"
   },
   "devDependencies" : {
     "shunt" : "*"
