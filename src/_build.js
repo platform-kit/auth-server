@@ -32,7 +32,6 @@ shunt({
 	// Replace the text
 	replace : {
 		'http://localhost:5500' : '',
-		'/_packages/angular.min.js' : 'https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js',
-		'/hello.js/dist/hello.all.min.js' : 'https://mrswitch.github.com/hello.js/hello.all.min.js'
+		'/_packages/angular.min.js' : 'https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js'
 	}
 });
