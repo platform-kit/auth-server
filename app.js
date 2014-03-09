@@ -28,10 +28,28 @@ heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL
 oauthshim.debug = true;
 
 //
-// Connect to the http server
+// Connect to the https server
 // Serve static content from the BIN directory
 //
-var app = connect().use(
+var app = connect();
+
+// Redirect any HTTP traffic to HTTPS
+app.use(function(req, res, next) {
+	var schema = req.headers['x-forwarded-proto'];
+	if (schema === 'https') {
+		// Already https; don't do anything special.
+		next();
+	}
+	else {
+		// Redirect to https.
+		res.redirect('https://' + req.headers.host + req.url);
+	}
+});
+
+
+//
+// Use the BIN directory as a public static folder
+app.use(
 	connect.static( __dirname + '/bin')
 );
 
