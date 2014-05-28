@@ -1,9 +1,8 @@
 var url = require('url');
 var connect = require('connect');
 var oauthshim = require('oauth-shim');
-
+var DEBUG = !process.env.PORT;
 var port=process.env.PORT || 5500;
-
 
 //
 // Initiate the database
@@ -25,7 +24,7 @@ CREATE TABLE apps (
 heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL
 */
 
-oauthshim.debug = true;
+oauthshim.debug = DEBUG;
 
 //
 // Connect to the https server
@@ -33,18 +32,29 @@ oauthshim.debug = true;
 //
 var app = connect();
 
-// Redirect any HTTP traffic to HTTPS
+// Add redirect
 app.use(function(req, res, next) {
-	var schema = req.headers['x-forwarded-proto'];
-	if (schema === 'https') {
-		// Already https; don't do anything special.
-		next();
+	res.redirect = function(url){
+		res.writeHead(301, {'Location': url});
+		res.end();
+	};
+	next();
+});
+
+
+// ENFORCE SSL
+
+app.use(function(req,res,next){
+	var heroku_scheme = req.headers['x-forwarded-proto'];
+
+	if( heroku_scheme && heroku_scheme !== 'https' ){
+		res.redirect('https://' + req.headers.host +req.url);
 	}
-	else {
-		// Redirect to https.
-		res.redirect('https://' + req.headers.host + req.url);
+	else{
+		next(); /* Continue to other routes if we're not redirecting */
 	}
 });
+
 
 
 //
