@@ -9,3 +9,5 @@ The [HelloJS](http://adodson.com/hello.js) client side library uses this service
 
 
 
+Authored by [Andrew Dodson](http://adodson.com)
+

@@ -5,11 +5,11 @@
     "start": "node app.js"
   },
   "dependencies": {
-  	"pg": "0.6.15",
-  	"connect" : "2.7.x",
-    "oauth-shim" : ">=0.0.5"
+    "pg": "0.6.15",
+    "connect": "2.7.x",
+    "oauth-shim": ">=0.1.0"
   },
-  "devDependencies" : {
-    "shunt" : "*"
+  "devDependencies": {
+    "shunt": "*"
   }
 }
