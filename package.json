@@ -1,7 +1,8 @@
 {
   "name": "auth-server",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
+    "postgres" : "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
     "start": "node app.js"
   },
   "dependencies": {
@@ -10,6 +11,6 @@
     "oauth-shim": ">=0.1.0"
   },
   "devDependencies": {
-    "shunt": "*"
+    "shunt": ">=0.1.6"
   }
 }
