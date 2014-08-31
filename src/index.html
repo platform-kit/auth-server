@@ -8,6 +8,7 @@
 <script src="./client_ids.js"></script>
 <script src="./controller.js"></script>
 <link href="/_packages/document.css" rel="stylesheet"/>
+<script src="/_packages/document.js"></script>
 <style>
 
 .table-cell{
@@ -33,24 +34,30 @@ textarea{
 	background-color:#fcf8e3;
 }
 
+button.signin{
+	margin-right:10px;
+}
+
 </style>
 <title>// Auth Server</title>
 <body ng-controller="controller">
 <h1>// auth-server</h1>
+<nav class="toc"></nav>
+
 <blockquote>
+<p>Add your application <b>client id</b>'s and <b>client secrets</b> below to use this proxy service with <a href="http://adodson.com/hello.js">HelloJS</a>
 <p>//auth-server is an implementation of <a href="https://github.com/MrSwitch/node-oauth-shim">node-oauth-shim</a> a RESTful OAuth2 and OAuth1 serverside authentication and authorisation library.
-
 </blockquote>
-
-<p>The <a href="http://adodson.com/hello.js">HelloJS</a> client side library uses this service by default, just provide your app id's below.</p>
 
 <!--NO-MARKDOWN-->
 
-<button ng-repeat="item in profiles" ng-click="item.signin()"><span ng-show="!item.name">Signin with {{item.network}}</span><span ng-show="item.name">Signed in as {{item.name}}</span></button>
+<h2>Signin</h2>
 
-<h2 ng-show="!!defaultProfile">Manage apps</h2>
+<button ng-repeat="item in profiles" ng-click="item.signin()" class="signin" ng-class="{blue:item.name}"><span ng-show="!item.name">Signin with {{item.network}}</span><span ng-show="item.name">Signed in as {{item.name}}</span></button>
 
-<p class="alert" ng-show="!defaultProfile">Signin above to manage your apps</p>
+<h2>Manage apps</h2>
+
+<p class="alert" ng-show="!defaultProfile"><a href="#signin">Signin</a> to manage your apps</p>
 
 <div ng-show="!!defaultProfile">
 	<p>Place your apps credentials in the table below</p>
@@ -79,6 +86,5 @@ textarea{
 
 
 
-<footer>Authored by <a href="http://adodson.com" rel="author">Andrew Dodson</a></footer>
 </body>
 </html>
