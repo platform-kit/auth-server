@@ -4,6 +4,8 @@ var oauthshim = require('oauth-shim');
 var DEBUG = !process.env.PORT;
 var port=process.env.PORT || 5500;
 
+var dear = require('dear');
+
 //
 // Initiate the database
 //
@@ -154,6 +156,7 @@ function rest(req, callback){
 				return;
 			}
 
+
 			// Ensure we have identifed the user
 			if(!qs.access_token||!qs.admin_id){
 				callback({
@@ -161,15 +164,44 @@ function rest(req, callback){
 				});
 				return;
 			}
-			// @todo check that the access_token belongs to the user
 
-			// Get the apps that they have registered
-			db.query('SELECT * FROM apps ' +
-				'WHERE admin_id SIMILAR TO $1',
-				['%\\m'+qs.admin_id+'\\M%'],
-				function(err,result){
-					callback(result);
-				});
+			// Check that the access_token is valid and matches the user id given
+			// Abstract the service and the access_token from the URL
+			var cred = qs.admin_id.split('@');
+
+			if(cred[1] === 'yahoo'){
+				// Get the apps that they have registered
+				db.query('SELECT * FROM apps ' +
+					'WHERE admin_id SIMILAR TO $1',
+					['%\\m'+qs.admin_id+'\\M%'],
+					function(err,result){
+						callback(result);
+					});
+				return;
+			}
+
+
+			dear( cred[1] ).api( 'me', { access_token : qs.access_token }).on('success', function(res){
+
+				if( res.id !== cred[0] ){
+					callback({
+						error : "Access token does not match credential for "+ cred[1]
+					});
+					return;
+				}
+
+				// Get the apps that they have registered
+				db.query('SELECT * FROM apps ' +
+					'WHERE admin_id SIMILAR TO $1',
+					['%\\m'+qs.admin_id+'\\M%'],
+					function(err,result){
+						callback(result);
+					});
+
+			}).on('error',function(e){
+				callback(e.error.message);
+			});
+
 
 			return;
 
