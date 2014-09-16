@@ -6,6 +6,14 @@ var port=process.env.PORT || 5500;
 
 var dear = require('dear');
 
+dear.init({
+	yahoo : {
+		client_id : process.env.YAHOO_ID,
+		client_secret : process.env.YAHOO_SECRET
+	}
+});
+
+
 //
 // Initiate the database
 //
@@ -168,18 +176,6 @@ function rest(req, callback){
 			// Check that the access_token is valid and matches the user id given
 			// Abstract the service and the access_token from the URL
 			var cred = qs.admin_id.split('@');
-
-			if(cred[1] === 'yahoo'){
-				// Get the apps that they have registered
-				db.query('SELECT * FROM apps ' +
-					'WHERE admin_id SIMILAR TO $1',
-					['%\\m'+qs.admin_id+'\\M%'],
-					function(err,result){
-						callback(result);
-					});
-				return;
-			}
-
 
 			dear( cred[1] ).api( 'me', { access_token : qs.access_token }).on('success', function(res){
 

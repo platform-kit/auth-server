@@ -21,7 +21,7 @@ var CLIENT_IDS = {
 		'auth-server.herokuapp.com' : '115601335281241'
 	}[window.location.hostname],
 	yahoo : {
-		'local.knarly.com' : 'dj0yJmk9TTNoTWV6eE5ObW5NJmQ9WVdrOWVtSmhVbk5pTm1VbWNHbzlNVFUxT0RNeU16UTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0yZQ--',
+		'local.knarly.com' : 'dj0yJmk9cjVDdHlDaGtrbldJJmQ9WVdrOVYyZFhSWE4yTm04bWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD1jOA--',
 		'adodson.com' : 'dj0yJmk9TWtNN0ppYTBGSW1vJmQ9WVdrOVIxSnhUVVJsTlRJbWNHbzlOamMxT1RVM01UWXkmcz1jb25zdW1lcnNlY3JldCZ4PWNk',
 		'auth-server.herokuapp.com' : 'dj0yJmk9M1JuUWFaRHl5U01nJmQ9WVdrOWMzZHBVRFJsTXpJbWNHbzlNVEExTURVeE5qYzJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0wNg--'
 	}[window.location.hostname]
