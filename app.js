@@ -251,6 +251,7 @@ oauthshim.interceptRedirect = function(path,hash){
 			case "signature_invalid" :
 				hash.error_message = "Your application needs to be registered at https//auth-server.herokuapp.com";
 			break;
+			case "invalid_credentials" :
 			case "required_credentials" :
 				hash.error_message = "Could not find the credentials that match the provided client_id. Register your app credentials by visiting https//auth-server.herokuapp.com";
 			break;
