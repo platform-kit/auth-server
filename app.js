@@ -177,7 +177,9 @@ function rest(req, callback){
 			// Abstract the service and the access_token from the URL
 			var cred = qs.admin_id.split('@');
 
-			dear( cred[1] ).api( 'me', { access_token : qs.access_token }).on('success', function(res){
+			dear( cred[1] )
+			.api( 'me', { access_token : qs.access_token })
+			.then(function(res){
 
 				if( res.id !== cred[0] ){
 					callback({
@@ -194,7 +196,7 @@ function rest(req, callback){
 						callback(result);
 					});
 
-			}).on('error',function(e){
+			}, function(e){
 				callback(e.error.message);
 			});
 

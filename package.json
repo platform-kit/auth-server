@@ -9,7 +9,7 @@
     "pg": "0.6.15",
     "connect": "2.7.x",
     "oauth-shim": ">=0.1.0",
-    "dear": "0.1.0"
+    "dear": "0.2.0"
   },
   "devDependencies": {
     "shunt": ">=0.1.6"
