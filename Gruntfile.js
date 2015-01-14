@@ -9,7 +9,7 @@ module.exports = function(grunt) {
 			build : {
 				'./bin/index.html' : './src/index.html',
 				'./bin/redirect.html' : './src/redirect.html',
-				'./README.md' : './src/index.html',
+				'./README.md' : './src/index.html'
 			},
 
 			options : {
@@ -17,17 +17,14 @@ module.exports = function(grunt) {
 				embed : true,
 
 				// No, this will break Angular code, which relies on $args
-				minify : false,
-
-				// This is the root directory on the local filesystem where root referenced scripts can be found.
-				// For instance, <script src="/vendor/jquery.js"></script> existed, and was pointing to a file outside this project*
-				// (*you might do this if you have a lot of projects)
-				// Then this is the full path to the web root.
-				root_dir : "../",
+				minify : true,
 
 				// Replace the text
 				replace : {
 					'http://localhost:5500' : '',
+					'"/hello.js/' : '"https://adodson.com/hello.js/',
+					'"/favicon.ico' : '"https://adodson.com/favicon.ico',
+					'"/adorn/' : '"https://adodson.com/adorn/',
 					'/_packages/angular.min.js' : 'https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js'
 				}
 			}

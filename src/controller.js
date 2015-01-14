@@ -1,9 +1,8 @@
+var app = angular.module('app', []);
 
-//
-// Angular Controller
-function controller($scope,$filter,$http) {
+app.controller('controller', ['$scope', '$filter', '$http',  function($scope, $filter, $http) {
 
-	var server = "http://localhost:5500";
+	var server = typeof(HTTP_SERVER) ? HTTP_SERVER : '';
 
 	// Fields
 	$scope.fields = ['reference', 'domain', 'client_id', 'client_secret'];
@@ -115,12 +114,11 @@ function controller($scope,$filter,$http) {
 
 
 	// Get the user credentials
-	hello.subscribe('auth.login', function(auth){
-		hello.api(auth.network+":me", function(o){
+	hello.on('auth.login', function(auth){
 
-			if(!o||o.error){
-				return;
-			}
+		hello( auth.network )
+		.api( "me" )
+		.then( function(o){
 
 			// Update the Profile
 			for(var i=0;i<$scope.profiles.length;i++){
@@ -174,7 +172,6 @@ function controller($scope,$filter,$http) {
 
 	hello.init(CLIENT_IDS, {
 		redirect_uri : REDIRECT_URI,
-		display : "page",
 		oauth_proxy : "/proxy"
 	});
 
@@ -194,42 +191,42 @@ function controller($scope,$filter,$http) {
 		return ids;
 	}
 
-}
+	//
+	// Profile Controls user access
+	// A user may have multiple profiles
+	function Profile(network){
+		this.network = network;
+		this.name = null;
+		this.thumbnail = null;
+		this.id = null;
+		this.access_token = null;
 
-//
-// Profile Controls user access
-// A user may have multiple profiles
-function Profile(network){
-	this.network = network;
-	this.name = null;
-	this.thumbnail = null;
-	this.id = null;
-	this.access_token = null;
+		this.signin = function(){
+			hello.login(network, {display:'popup'});
+		};
 
-	this.signin = function(){
-		hello.login(network, {display:'popup'});
-	};
-
-	this.update = function(o){
-		if(o.name){
-			this.name = o.name;
-		}
-		if(o.thumbnail){
-			this.thumbnail = o.thumbnail;
-		}
-		if(o.id){
-			this.id = o.id + '@' + this.network;
-		}
-		if(o.access_token){
-			this.access_token = o.access_token;
-		}
+		this.update = function(o){
+			if(o.name){
+				this.name = o.name;
+			}
+			if(o.thumbnail){
+				this.thumbnail = o.thumbnail;
+			}
+			if(o.id){
+				this.id = o.id + '@' + this.network;
+			}
+			if(o.access_token){
+				this.access_token = o.access_token;
+			}
 
 
-		console.log(this);
-	};
-}
+			console.log(this);
+		};
+	}
 
-var app = angular.module('app',[]);
+}]);
+
+
 app.directive('contenteditable', function() {
   return {
     require: 'ngModel',
@@ -251,3 +248,4 @@ app.directive('contenteditable', function() {
     }
   };
 });
+
