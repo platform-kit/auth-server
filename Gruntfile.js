@@ -23,7 +23,6 @@ module.exports = function(grunt) {
 				replace : {
 					'http://localhost:5500' : '',
 					'"/hello.js/' : '"https://adodson.com/hello.js/',
-					'"/favicon.ico' : '"https://adodson.com/favicon.ico',
 					'"/adorn/' : '"https://adodson.com/adorn/',
 					'/_packages/angular.min.js' : 'https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js'
 				}

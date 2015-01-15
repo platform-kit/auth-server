@@ -66,6 +66,14 @@ app.use(function(req,res,next){
 });
 
 
+// FAVICON
+app.use(function(req,res,next){
+	if( req.url === '/favicon.ico' ){
+		res.redirect('https://adodson.com/favicon.ico');
+		return;
+	}
+	next();
+});
 
 //
 // Use the BIN directory as a public static folder
