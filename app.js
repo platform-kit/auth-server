@@ -1,6 +1,7 @@
 var url = require('url');
 var connect = require('connect');
-var oauthshim = require('oauth-shim');
+var oauthshim = require('./lib/oauth-shim');
+var param = require('./lib/utils/param');
 var DEBUG = !process.env.PORT;
 var port=process.env.PORT || 5500;
 
@@ -106,7 +107,7 @@ app.use("/rest", function(req,res){
 		// Does the request ask for JSONP response?
 		// Get the callback parameter with the request
 		var location = url.parse(req.url);
-		var qs = oauthshim.utils.param(location.search||'');
+		var qs = param(location.search||'');
 		if(qs&&qs.callback){
 			body = qs.callback + "(" + body + ")";
 		}
@@ -126,7 +127,7 @@ function rest(req, callback){
 
 	// QueryString
 	var location = url.parse(req.url);
-	var qs = oauthshim.utils.param(location.search||'');
+	var qs = param(location.search||'');
 
 	// Get POST body
 	var getData = function(callback){
@@ -141,7 +142,7 @@ function rest(req, callback){
 					body = JSON.parse(body);
 				}
 				catch(e){
-					oauthshim.utils.param(body);
+					param(body);
 				}
 				callback( req.method, body );
 			});
@@ -236,7 +237,7 @@ function rest(req, callback){
 // Listen for auth calls
 // Listen to incoming responses to the path proxy
 //
-app.use('/proxy', oauthshim.request );
+app.use('/proxy', oauthshim );
 
 // If use native clientServer use listen
 // e.g. oauthshim.listen(app,'/proxy');

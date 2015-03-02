@@ -1,9 +1,16 @@
 
 var pg = require('pg');
-var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL||"tcp://postgres:root@localhost/postgres";
+var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL||"tcp://postgres:root@localhost/auth-server";
 var client = new pg.Client(conn);
-client.connect();
-console.log("Connected to POSTGRESQL " + conn);
+client.connect(function(err){
+	// Connected to DB?
+	if(err){
+		return console.error("Failed to connected to POSTGRESQL " + conn, err);
+	}
+	else{
+		console.log("Connected to POSTGRESQL " + conn);
+	}
+});
 
 
 module.exports = new (function(){
@@ -17,7 +24,7 @@ module.exports = new (function(){
 	this.table = '';
 
 	this.insert = function(data,callback){
-
+		
 		var keys = [], 
 			values = [], 
 			temp = [],

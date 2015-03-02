@@ -7,9 +7,9 @@ module.exports = function(grunt) {
 		shunt : {
 
 			build : {
-				'./bin/index.html' : './src/index.html',
-				'./bin/redirect.html' : './src/redirect.html',
-				'./README.md' : './src/index.html',
+				'./bin/index.html' : './static/index.html',
+				'./bin/redirect.html' : './static/redirect.html',
+				'./README.md' : './static/index.html',
 			},
 
 			options : {
