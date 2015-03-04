@@ -35,7 +35,6 @@ CREATE TABLE apps (
 heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL
 */
 
-oauthshim.debug = DEBUG;
 
 //
 // Connect to the https server
@@ -236,39 +235,77 @@ function rest(req, callback){
 	});
 }
 
-//
-// HelloJS
-//
 
+
+
+// /////////////////////////////////////////////
+//
+// Apply the node-oauth-shim
+// app.use('/proxy', oauthshim);
+//
+// /////////////////////////////////////////////
 
 //
 // Listen for auth calls
 // Listen to incoming responses to the path proxy
 //
-app.use('/proxy', oauthshim );
+app.use('/proxy', oauthshim.interpret);
+app.use('/proxy', oauthshim.proxy);
+
+// Change the error handler messages coming from this
+app.use('/proxy', function(req, res, next){
+
+	if( req.oauthshim && req.oauthshim.data && req.oauthshim.redirect ){
+
+		var data = req.oauthshim.data;
+
+		if( "error" in data ){
+			// Change the default messages in the response
+			switch(data.error){
+				case "consumer_key_unknown" :
+					data.error_message = "Please check your application id and settings locally and at https//auth-server.herokuapp.com";
+				break;
+				case "signature_invalid" :
+					data.error_message = "Your application needs to be registered at https//auth-server.herokuapp.com";
+				break;
+				case "invalid_credentials" :
+				case "required_credentials" :
+					data.error_message = "Could not find the credentials that match the provided client_id. Register your app credentials by visiting https//auth-server.herokuapp.com";
+				break;
+			}
+		}
+	}
+	next();
+});
+
+
+// Was the login for this server
+// auth-server maintains its own list of users
+app.use('/proxy', function(req, res, next){
+
+	if( req.oauthshim && req.oauthshim.data && req.oauthshim.redirect ){
+
+		var data = req.oauthshim.data;
+		var opts = req.oauthshim.options;
+		var redirect = req.oauthshim.redirect;
+
+		// Was this an OAuth Login response and does it contain a new access_token?
+		if( "access_token" in data && !( "path" in opts ) ){
+			// Store this access_token
+			console.log("Session created", data.access_token.substr(0,8) + '...' );
+		}
+	}
+	next();
+});
+
+
+app.use('/proxy', oauthshim.redirect);
+app.use('/proxy', oauthshim.unhandled);
+
 
 // If use native clientServer use listen
 // e.g. oauthshim.listen(app,'/proxy');
 
-//
-// Override redirection
-//
-oauthshim.interceptRedirect = function(path,hash){
-	if(hash && "error" in hash ){
-		switch(hash.error){
-			case "consumer_key_unknown" :
-				hash.error_message = "Please check your application id and settings locally and at https//auth-server.herokuapp.com";
-			break;
-			case "signature_invalid" :
-				hash.error_message = "Your application needs to be registered at https//auth-server.herokuapp.com";
-			break;
-			case "invalid_credentials" :
-			case "required_credentials" :
-				hash.error_message = "Could not find the credentials that match the provided client_id. Register your app credentials by visiting https//auth-server.herokuapp.com";
-			break;
-		}
-	}
-};
 
 
 //
