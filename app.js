@@ -1,10 +1,10 @@
 var url = require('url');
 var connect = require('connect');
+var serveStatic = require('serve-static');
 var oauthshim = require('./lib/oauth-shim');
 var param = require('./lib/utils/param');
 var DEBUG = !process.env.PORT;
 var port=process.env.PORT || 5500;
-
 var dear = require('dear');
 
 dear.init({
@@ -78,7 +78,7 @@ app.use(function(req,res,next){
 //
 // Use the BIN directory as a public static folder
 app.use(
-	connect.static( __dirname + '/bin')
+	serveStatic( __dirname + '/bin')
 );
 
 console.log("HTTP server listening on port "+ port);

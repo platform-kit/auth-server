@@ -1,6 +1,6 @@
 
 var pg = require('pg');
-var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL||"tcp://postgres:root@localhost/auth-server";
+var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL||"postgres://postgres:root@localhost/auth-server";
 var client = new pg.Client(conn);
 client.connect(function(err){
 	// Connected to DB?
