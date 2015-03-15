@@ -1,6 +1,7 @@
 {
   "name": "auth-server",
   "version": "0.0.3",
+  "node": "0.10.33",
   "scripts": {
     "postgres": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
     "start": "node app.js"
