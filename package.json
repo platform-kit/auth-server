@@ -7,9 +7,10 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "pg": "0.6.15",
     "connect": "^3.3.4",
     "dear": "^0.3.0",
+    "newrelic": "^1.18.0",
+    "pg": "0.6.15",
     "serve-static": "^1.9.1"
   },
   "devDependencies": {
