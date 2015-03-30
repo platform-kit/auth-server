@@ -1,3 +1,4 @@
+require('newrelic');
 var url = require('url');
 var connect = require('connect');
 var serveStatic = require('serve-static');
