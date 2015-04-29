@@ -9,6 +9,7 @@ module.exports = function(grunt) {
 			build : {
 				'./bin/index.html' : './static/index.html',
 				'./bin/redirect.html' : './static/redirect.html',
+				'./bin/manifest.json' : './static/manifest.json',
 				'./README.md' : './static/index.html'
 			},
 
