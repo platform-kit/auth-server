@@ -86,6 +86,14 @@ console.log("HTTP server listening on port "+ port);
 app.listen(port);
 
 
+// Status
+// Print out a status message
+app.use("/status", function(req,res){
+	res.end("Status: ok", 'utf-8');
+});
+
+
+
 //
 // Listen out for REST API access
 // Serve the database
