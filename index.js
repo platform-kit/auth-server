@@ -1,2 +1,2 @@
 require('newrelic');
-require('./lib/app');
+require('./src/app');
