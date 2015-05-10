@@ -1,3 +1,3 @@
-[submodule "lib/oauth-shim"]
-	path = lib/oauth-shim
+[submodule "lib/node_modules/oauth-shim"]
+	path = lib/node_modules/oauth-shim
 	url = https://github.com/MrSwitch/node-oauth-shim.git

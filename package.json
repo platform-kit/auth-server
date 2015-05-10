@@ -2,9 +2,10 @@
   "name": "auth-server",
   "version": "0.0.3",
   "node": "0.10.33",
+  "main": "index.js",
   "scripts": {
     "postgres": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
-    "start": "node app.js"
+    "start": "node lib/app.js"
   },
   "dependencies": {
     "connect": "^3.3.4",
