@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "node": "0.10.33",
   "scripts": {
-    "postgres": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
+    "db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
     "start": "node app.js"
   },
   "dependencies": {
@@ -12,8 +12,5 @@
     "newrelic": "^1.18.0",
     "pg": "0.6.15",
     "serve-static": "^1.9.1"
-  },
-  "devDependencies": {
-    "shunt": ">=0.1.6"
   }
 }

@@ -79,7 +79,7 @@ app.use(function(req,res,next){
 //
 // Use the BIN directory as a public static folder
 app.use(
-	serveStatic( __dirname + '/bin')
+	serveStatic( __dirname + '/static')
 );
 
 console.log("HTTP server listening on port "+ port);
