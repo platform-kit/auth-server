@@ -55,7 +55,7 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 		}).success(function(response){
 
 			// Update the guid to the app in memory
-			if(!app.guid&&!response.guid){
+			if(response.name === "error" && response.detail){
 				ngNotify.set(response.detail, "error");
 				console.error(response);
 				return;
