@@ -63,7 +63,12 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 			else{
 				ngNotify.set("Successfully updated records", "success");
 			}
-			app.guid = response.guid;
+
+			// INSERT returns a GUID
+			// UPDATE does not
+			if (response.guid) {
+				app.guid = response.guid;
+			}
 
 			// update view
 			$scope.$apply();
