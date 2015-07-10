@@ -10,7 +10,11 @@
 <script src="./components/ng-notify/dist/ng-notify.min.js"></script>
 <script src="https://adodson.com/hello.js/dist/hello.all.min.js"></script>
 <script>
-var HTTP_SERVER = 'http://localhost:5500';
+
+var HTTP_SERVER = {
+	'local.knarly.com' : 'http://localhost:5500'
+}[window.location.host] || '/';
+
 </script>
 <script src="./client_ids.js"></script>
 <script src="./controller.js"></script>
