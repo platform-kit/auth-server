@@ -1,6 +1,6 @@
-var app = angular.module('app', []);
+var app = angular.module('app', ['ngNotify']);
 
-app.controller('controller', ['$scope', '$filter', '$http',  function($scope, $filter, $http) {
+app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  function($scope, $filter, $http, ngNotify) {
 
 	var server = typeof(HTTP_SERVER) ? HTTP_SERVER : '';
 
@@ -56,11 +56,12 @@ app.controller('controller', ['$scope', '$filter', '$http',  function($scope, $f
 
 			// Update the guid to the app in memory
 			if(!app.guid&&!response.guid){
+				ngNotify.set(response.detail, "error");
 				console.error(response);
 				return;
 			}
 			else{
-				alert("Successfully updated records");
+				ngNotify.set("Successfully updated records", "success");
 			}
 			app.guid = response.guid;
 
@@ -225,27 +226,3 @@ app.controller('controller', ['$scope', '$filter', '$http',  function($scope, $f
 	}
 
 }]);
-
-
-app.directive('contenteditable', function() {
-  return {
-    require: 'ngModel',
-    link: function(scope, element, attrs, ctrl) {
-      // view -> model
-      element.bind('blur', function() {
-        scope.$apply(function() {
-          ctrl.$setViewValue(element.html());
-        });
-      });
-
-      // model -> view
-      ctrl.$render = function() {
-        element.html(ctrl.$viewValue);
-      };
-
-      // load init value from DOM
-      ctrl.$render();
-    }
-  };
-});
-
