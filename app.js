@@ -251,7 +251,7 @@ function rest(req, callback){
 			else{
 				db.update( data, {guid:data.guid}, function(err,result){
 
-					callback.call(null,result);
+					callback.call(null,err||result);
 				});
 			}
 
