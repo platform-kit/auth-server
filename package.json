@@ -3,8 +3,13 @@
   "version": "0.0.3",
   "node": "0.10.33",
   "scripts": {
-    "db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
-    "start": "node app.js"
+    "start": "node app.js",
+    "heroku_db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
+    "local_db": "PGUSER=postgres PGPASSWORD=root psql auth-server",
+    "local_drop_db": "PGUSER=postgres PGPASSWORD=root dropdb auth-server",
+    "heroku_export_db": "PGUSER=postgres PGPASSWORD=root heroku pg:pull HEROKU_POSTGRESQL_BLUE_URL auth-server --app auth-server",
+    "export_db_manual": "pg_dump --verbose -C -O -f db.dump -F c -Z 0 `heroku config:get HEROKU_POSTGRESQL_BLUE_URL`",
+    "import_db_manual": "PGUSER=postgres PGPASSWORD=root pg_restore --no-owner -d auth-server db.dump"
   },
   "dependencies": {
     "connect": "^3.3.4",
