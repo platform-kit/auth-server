@@ -294,7 +294,7 @@ app.use('/proxy', function(req, res, next){
 				break;
 				case "invalid_credentials" :
 				case "required_credentials" :
-					data.error_message = "Could not find the credentials that match the provided client_id. Register your app credentials by visiting https//auth-server.herokuapp.com";
+					data.error_message += ". Register your app credentials by visiting https//auth-server.herokuapp.com";
 				break;
 			}
 		}
