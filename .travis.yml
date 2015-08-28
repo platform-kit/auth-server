@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+- '0.10'
+deploy:
+  provider: heroku
+  api_key:
+    secure: NctZm8XMplPjSoYW1zA5bkDCnFg3BdYSTRgl/emXaM1OnUlneb6yKw8SgdoTk6xqajWN/chpslMsyxCXbrIOGQKs4H8S3pPxWxGw9Yq1x8iDgpLB5FG1hUG2t+w5dRs5aCTwKNobrY+zbkO0LXjgDaDcGoW6WdR4GIm0zBcS8vI=
+  app: auth-server
