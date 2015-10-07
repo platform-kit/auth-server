@@ -238,7 +238,7 @@ function rest(req, callback){
 		// POST
 		}
 		else{
-			
+
 			if( !data.guid ){
 
 				db.insert( data, function(err,result){
@@ -317,6 +317,34 @@ app.use('/proxy', function(req, res, next){
 		if( "access_token" in data && !( "path" in opts ) ){
 			// Store this access_token
 			console.log("Session created", data.access_token.substr(0,8) + '...' );
+
+			// Save the grant URL
+			if (opts && opts.oauth) {
+
+				// Modify the record in the database.
+				var id = opts.client_id;
+
+				db.query(
+					'SELECT grant_url FROM apps WHERE client_id = $1 LIMIT 1',
+					[id],
+					function(err, result) {
+						if (err) {
+							console.log(err);
+						}
+						else if (result.rows[0] && !result.rows[0].grant_url) {
+							// Update DB
+							db.update({
+								grant_url: (opts.oauth.grant || opts.oauth.token)
+							}, {
+								client_id: id
+							}, function(err,result) {
+								console.log(err || result);
+							});
+						}
+
+					}
+				);
+			}
 		}
 	}
 	next();
