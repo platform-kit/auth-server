@@ -363,11 +363,11 @@ app.use('/proxy', oauthshim.unhandled);
 //
 // Override the credentials access
 // Return the secret from a database
-oauthshim.getCredentials = function(id,callback){
+oauthshim.credentials.get = function(query, callback) {
 
 	// No Credentials?
 	// Retrun NULL, and accept default handling
-	if(!id){
+	if (!query) {
 		callback(null);
 		return;
 	}
@@ -376,12 +376,12 @@ oauthshim.getCredentials = function(id,callback){
 	// Search the database
 	// Get all the current stored credentials
 	//
-	db.query('SELECT client_secret FROM apps WHERE client_id = $1 LIMIT 1',
-		[id],
+	db.query('SELECT domain, client_id, client_secret, grant_url FROM apps WHERE client_id = $1 LIMIT 1',
+		[query.client_id],
 		function(err,result){
 
 			//Callback
 			// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
-			callback( result.rows.length ? result.rows[0].client_secret : null );
+			callback( result.rows.length ? result.rows[0] : null );
 		});
 };
