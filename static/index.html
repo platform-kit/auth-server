@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html ng-app='app'>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" /> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <!-- use the latest IE browser always, and optionally use chrome frame if installed -->
 <meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1" />
 <meta name="ga:tracking" content="UA-35317561-3" />
@@ -82,13 +82,13 @@ button.signin{
 <div class="table apps" ng-show="!!defaultProfile">
 	<div class="table-header">
 		<div class="table-row">
-			<div class="table-cell" ng-repeat="name in fields">{{name}}</div>
+			<div class="table-cell" ng-repeat="info in fields">{{info.name}}</div>
 			<div class="table-cell">Action</div>
 		</div>
 	</div>
 	<div class="table-body">
 		<form ng-repeat="item in apps" class="table-row" ng-submit="postApp(item)">
-			<div class="table-cell" ng-repeat="name in fields"><textarea ng-model="item[name]" required placeholder="{{name}}"></textarea></div>
+			<div class="table-cell" ng-repeat="info in fields"><textarea ng-model="item[info.name]" ng-required="info.required" placeholder="{{info.name}}"></textarea></div>
 			<div class="table-cell"><button type="submit" class="green">Save</button> <button ng-click="deleteApp(item)">Delete</button></div>
 		</form>
 	</div>
@@ -102,7 +102,7 @@ button.signin{
 
 <h2>Monitoring</h2>
 
-<iframe src="https://rpm.newrelic.com/public/charts/85Qgj4zrJ75" width="100%" height="300" scrolling="no" frameborder="no"></iframe> 
+<iframe src="https://rpm.newrelic.com/public/charts/85Qgj4zrJ75" width="100%" height="300" scrolling="no" frameborder="no"></iframe>
 
 <iframe src="https://rpm.newrelic.com/public/charts/lotzGlNWZQ5" width="100%" height="300" scrolling="no" frameborder="no"></iframe>
 

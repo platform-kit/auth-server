@@ -5,7 +5,13 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 	var server = typeof(HTTP_SERVER) ? HTTP_SERVER : '';
 
 	// Fields
-	$scope.fields = ['reference', 'domain', 'client_id', 'client_secret'];
+	$scope.fields = [
+		{name: 'reference', required: true},
+		{name: 'domain', required: true},
+		{name: 'client_id', required: true},
+		{name: 'client_secret', required: true},
+		{name: 'grant_url', required: false}
+	];
 
 	// Apps
 	// A list of the users currently registered apps
