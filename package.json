@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "node": "0.10.33",
   "scripts": {
-    "start": "node app.js",
+    "start": "node server.js",
     "heroku_db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
     "local_db": "PGUSER=postgres PGPASSWORD=root psql auth-server",
     "local_drop_db": "PGUSER=postgres PGPASSWORD=root dropdb auth-server",
@@ -14,7 +14,7 @@
   "dependencies": {
     "connect": "^3.3.4",
     "dear": "^0.3.0",
-    "newrelic": "^1.18.0",
+    "newrelic": "*",
     "pg": "0.6.15",
     "serve-static": "^1.9.1"
   }
