@@ -1,6 +1,7 @@
+/* global CLIENT_IDS, REDIRECT_URI, hello, HTTP_SERVER, angular */
 var app = angular.module('app', ['ngNotify']);
 
-app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  function($scope, $filter, $http, ngNotify) {
+app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function($scope, $filter, $http, ngNotify) {
 
 	var server = typeof(HTTP_SERVER) ? HTTP_SERVER : '';
 
@@ -16,28 +17,28 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 	// Apps
 	// A list of the users currently registered apps
 	$scope.apps = [];
-	$scope.addApp = function(){
+	$scope.addApp = function() {
 		$scope.apps.push({
-			client_id : '',
-			client_secret : '',
-			admin_id : getAdmins().join(' ')
-//			service : ''
+			client_id: '',
+			client_secret: '',
+			admin_id: getAdmins().join(' ')
 		});
+
 		$scope.$apply();
 	};
 
-	$scope.saveApps = function(){
+	$scope.saveApps = function() {
 
 		// Loop through all the apps
-		for(var i=0;i<$scope.apps.length;i++){
-			postApp($scope.apps[i]);
-		}
+		$scope.apps.forEach(function(app) {
+			$scope.postApp(app);
+		});
 
 	};
 
 	//
 	// Post individual app
-	$scope.postApp = function(app){
+	$scope.postApp = function(app) {
 
 		// Get the current users signed attributes
 		var admins = getAdmins();
@@ -45,29 +46,28 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 		// Ensure that all the current profiles are defined in the admin_id section.
 		var a = app.admin_id.split(/[\s\,]+/);
 
-		for(var j=0;j<admins.length;j++){
-			if(a.indexOf(admins[j]) === -1){
-				a.push(admins[j]);
+		// User credentials
+		admins.forEach(function (credentials) {
+			if (a.indexOf(credentials) === -1) {
+				a.push(credentials);
 			}
-		}
+		});
 		app.admin_id = a.join(' ');
-
 
 		// Post this request off to the server
 		$http({
-			url: server + "/rest",
-			method: "POST",
+			url: server + '/rest',
+			method: 'POST',
 			data: app
-		}).success(function(response){
+		}).success(function(response) {
 
 			// Update the guid to the app in memory
-			if(response.name === "error" && response.detail){
-				ngNotify.set(response.detail, "error");
-				console.error(response);
+			if (response.name === 'error' && response.detail) {
+				ngNotify.set(response.detail, 'error');
 				return;
 			}
-			else{
-				ngNotify.set("Successfully updated records", "success");
+			else {
+				ngNotify.set('Successfully updated records', 'success');
 			}
 
 			// INSERT returns a GUID
@@ -83,30 +83,27 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 
 	//
 	// Delete
-	$scope.deleteApp = function(app){
+	$scope.deleteApp = function(app) {
 
-		if(!app.guid){
+		if (!app.guid) {
 			removeItem();
 			return;
 		}
 
 		// Post this request off to the server
 		$http({
-			url: server + "/rest",
-			method: "GET",
-			params: {guid:app.guid, action:'delete'}
-		}).success(function(response){
-
+			url: server + '/rest',
+			method: 'GET',
+			params: {guid: app.guid, action: 'delete'}
+		}).success(function() {
 			removeItem();
-
 		});
 
-		function removeItem(){
+		function removeItem() {
 			// Loop through all the apps
-			for(var i=0;i<$scope.apps.length;i++){
-				if($scope.apps[i]===app){
-					$scope.apps.splice(i,1);
-					console.log($scope.apps,i);
+			for (var i = 0; i < $scope.apps.length; i++) {
+				if ($scope.apps[i] === app) {
+					$scope.apps.splice(i, 1);
 				}
 			}
 
@@ -120,25 +117,25 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 	$scope.profiles = [];
 	$scope.defaultProfile = null;
 
-	for(var x in CLIENT_IDS){
+	for (var x in CLIENT_IDS) {
 		$scope.profiles.push(new Profile(x));
 	}
 
 
 	// Get the user credentials
-	hello.on('auth.login', function(auth){
+	hello.on('auth.login', function(auth) {
 
-		hello( auth.network )
-		.api( "me" )
-		.then( function(o){
+		hello(auth.network)
+		.api('me')
+		.then(function(o) {
 
 			// Update the Profile
-			for(var i=0;i<$scope.profiles.length;i++){
-				var profile = $scope.profiles[i];
-				if(profile.network === auth.network){
+			$scope.profiles.forEach(function(profile) {
+
+				if (profile.network === auth.network) {
 
 					// Asign the first one to be the default profile
-					if(!$scope.defaultProfile){
+					if (!$scope.defaultProfile) {
 						$scope.defaultProfile = profile;
 					}
 
@@ -150,23 +147,23 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 
 					// User the profile.id to make a REST request to the server for more the data
 					$http({
-						url: server + "/rest",
-						method: "GET",
+						url: server + '/rest',
+						method: 'GET',
 						params: {
-							"access_token": profile.access_token,
-							"admin_id" : profile.id
+							'access_token': profile.access_token,
+							'admin_id': profile.id
 						}
-					}).success(function(response){
+					}).success(function(response) {
 						// Loop through the rows and add to the list of the users apps.
-						for(var i=0;i<response.rows.length;i++){
+						for (var i = 0; i < response.rows.length; i++) {
 							var b = true;
 							// Does it exist
-							for(var j=0;j<$scope.apps.length;j++){
-								if($scope.apps[j].guid===response.rows[i].guid){
-									b=false;
+							for (var j = 0; j < $scope.apps.length; j++) {
+								if ($scope.apps[j].guid === response.rows[i].guid) {
+									b = false;
 								}
 							}
-							if(b){
+							if (b) {
 								$scope.apps.push(response.rows[i]);
 							}
 						}
@@ -178,24 +175,24 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 					// update view
 					$scope.$apply();
 				}
-			}
+			});
 		});
 	});
 
 	hello.init(CLIENT_IDS, {
-		redirect_uri : REDIRECT_URI,
-		oauth_proxy : "/proxy"
+		redirect_uri: REDIRECT_URI,
+		oauth_proxy: '/proxy'
 	});
 
 
-	function getAdmins(){
+	function getAdmins() {
 
 		var ids = [];
 
 		// Get a snapshot of the current profiles
-		for(i=0;i<$scope.profiles.length;i++){
+		for (var i = 0; i < $scope.profiles.length; i++) {
 			var id = $scope.profiles[i].id;
-			if(id){
+			if (id) {
 				ids.push(id);
 			}
 		}
@@ -206,33 +203,30 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify',  functio
 	//
 	// Profile Controls user access
 	// A user may have multiple profiles
-	function Profile(network){
+	function Profile(network) {
 		this.network = network;
 		this.name = null;
 		this.thumbnail = null;
 		this.id = null;
 		this.access_token = null;
 
-		this.signin = function(){
-			hello.login(network, {display:'popup'});
+		this.signin = function() {
+			hello.login(network, {display: 'popup'});
 		};
 
-		this.update = function(o){
-			if(o.name){
+		this.update = function(o) {
+			if (o.name) {
 				this.name = o.name;
 			}
-			if(o.thumbnail){
+			if (o.thumbnail) {
 				this.thumbnail = o.thumbnail;
 			}
-			if(o.id){
+			if (o.id) {
 				this.id = o.id + '@' + this.network;
 			}
-			if(o.access_token){
+			if (o.access_token) {
 				this.access_token = o.access_token;
 			}
-
-
-			console.log(this);
 		};
 	}
 
