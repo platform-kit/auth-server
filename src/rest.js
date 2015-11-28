@@ -5,7 +5,7 @@ var debug = require('debug')('rest');
 // Defines the Web API for managing the site
 var connect = require('connect');
 var db = require('./db');
-var param = require('../lib/utils/param');
+var param = require('./utils/param');
 var url = require('url');
 var dear = require('dear');
 
