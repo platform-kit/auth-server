@@ -9,25 +9,10 @@ var app = connect();
 app.listen(port);
 
 // Add redirect
-app.use((req, res, next) => {
-	res.redirect = (url) => {
-		res.writeHead(301, {'Location': url});
-		res.end();
-	};
-	next();
-});
+app.use(require('./utils/http_extend_redirect'));
 
 // ENFORCE SSL
-app.use((req, res, next) => {
-	var heroku_scheme = req.headers['x-forwarded-proto'];
-
-	if (heroku_scheme && heroku_scheme !== 'https') {
-		res.redirect('https://' + req.headers.host + req.url);
-	}
-	else {
-		next(); /* Continue to other routes if we're not redirecting */
-	}
-});
+app.use(require('./utils/http_enforce_ssl'));
 
 // FAVICON
 app.use((req, res, next) => {
@@ -38,10 +23,8 @@ app.use((req, res, next) => {
 	next();
 });
 
-// Use the BIN directory as a public static folder
-app.use(
-	serveStatic(__dirname + '/../static')
-);
+// Static files
+app.use(serveStatic(__dirname + '/../static'));
 
 // Status
 // Print out a status message
