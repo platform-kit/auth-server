@@ -6,13 +6,13 @@ var connect = require('connect');
 
 // Export this module as middleware
 var app = module.exports = connect();
-app.use(function(req, res) {
+app.use((req, res) => {
 
 	// Database connection still ticking?
 	// Make an arbitary call...
 	db.query('SELECT COUNT(*) FROM apps LIMIT 1',
 		[],
-		function(err, result) {
+		(err, result) => {
 			if (err) {
 				res.writeHead(503);
 				res.end('Status: failing', 'utf-8');

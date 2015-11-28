@@ -37,7 +37,7 @@ heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL
 // Export this module as middleware
 var app = module.exports = connect();
 
-app.use(function(req, res) {
+app.use((req, res) => {
 
 	new Rest(req, res);
 
@@ -90,7 +90,6 @@ Rest.prototype.init = function(method, data) {
 	// QueryString
 	var location = url.parse(this.req.url);
 	var qs = param(location.search || '');
-	var _this = this;
 	var callback = this.serve.bind(this);
 
 	// Get request
@@ -116,24 +115,24 @@ Rest.prototype.init = function(method, data) {
 
 		dear(network)
 		.api('me', {access_token: qs.access_token})
-		.then(function(r) {
+		.then((r) => {
 
 			if (r.id !== user_id) {
-				return _this.error('Access token does not match credential for ' + user_id);
+				return this.error('Access token does not match credential for ' + user_id);
 			}
 
 			// Get the apps that they have registered
 			db.query('SELECT * FROM apps ' +
 				'WHERE admin_id SIMILAR TO $1',
 				['%\\m' + qs.admin_id + '\\M%'],
-				function(err, result) {
+				(err, result) => {
 					callback(result);
 				});
 
-		}, function(e) {
+		}, (e) => {
 			callback(e.error.message);
 		})
-		.then(null, function(e) {
+		.then(null, (e) => {
 			callback(e.message);
 		});
 
@@ -141,13 +140,13 @@ Rest.prototype.init = function(method, data) {
 	else {
 
 		if (!data.guid) {
-			db.insert(data, function(err, result) {
+			db.insert(data, (err, result) => {
 				debug(err || result.rows[0]);
 				callback(err || result.rows[0]);
 			});
 		}
 		else {
-			db.update(data, {guid: data.guid}, function(err, result) {
+			db.update(data, {guid: data.guid}, (err, result) => {
 				callback(result);
 			});
 		}
@@ -163,11 +162,11 @@ Rest.prototype.body = function(next) {
 
 	if (req.method === 'POST') {
 
-		req.on('data', function(data) {
+		req.on('data', (data) => {
 			body += data;
 		});
 
-		req.on('end', function() {
+		req.on('end', () => {
 			try {
 				body = JSON.parse(body);
 			}

@@ -17,7 +17,7 @@ app.use(oauthshim.interpret);
 app.use(oauthshim.proxy);
 
 // Change the error handler messages coming from this
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
 
 	if (req.oauthshim && req.oauthshim.data && req.oauthshim.redirect) {
 
@@ -45,7 +45,7 @@ app.use(function(req, res, next) {
 
 // Was the login for this server
 // auth-server maintains its own list of users
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
 
 	if (req.oauthshim && req.oauthshim.data && req.oauthshim.redirect) {
 
@@ -103,7 +103,7 @@ app.use(oauthshim.unhandled);
 //
 // Override the credentials access
 // Return the secret from a database
-oauthshim.credentials.get = function(query, callback) {
+oauthshim.credentials.get = (query, callback) => {
 
 	// No Credentials?
 	// Retrun NULL, and accept default handling
@@ -118,7 +118,7 @@ oauthshim.credentials.get = function(query, callback) {
 	//
 	db.query('SELECT domain, client_id, client_secret, grant_url FROM apps WHERE client_id = $1 LIMIT 1',
 		[query.client_id],
-		function(err, result) {
+		(err, result) => {
 
 			// Callback
 			// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)

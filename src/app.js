@@ -9,8 +9,8 @@ var app = connect();
 app.listen(port);
 
 // Add redirect
-app.use(function(req, res, next) {
-	res.redirect = function(url) {
+app.use((req, res, next) => {
+	res.redirect = (url) => {
 		res.writeHead(301, {'Location': url});
 		res.end();
 	};
@@ -18,7 +18,7 @@ app.use(function(req, res, next) {
 });
 
 // ENFORCE SSL
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
 	var heroku_scheme = req.headers['x-forwarded-proto'];
 
 	if (heroku_scheme && heroku_scheme !== 'https') {
@@ -30,7 +30,7 @@ app.use(function(req, res, next) {
 });
 
 // FAVICON
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
 	if (req.url === '/favicon.ico') {
 		res.redirect('https://adodson.com/favicon.ico');
 		return;

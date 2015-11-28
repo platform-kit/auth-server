@@ -12,7 +12,7 @@ function DB(conn) {
 	}
 
 	this.client = new pg.Client(conn);
-	this.client.connect(function(err) {
+	this.client.connect((err) => {
 		// Connected to DB?
 		if (err) {
 			return debug('Failed to connected to POSTGRESQL ' + conn, err);
@@ -39,7 +39,7 @@ DB.prototype.insert = function(data, callback) {
 		temp = [],
 		i = 1;
 
-	for (var x in data) {
+	for (let x in data) {
 		keys.push(x);
 		temp.push('$' + i++);
 		values.push(data[x]);
@@ -76,7 +76,7 @@ DB.prototype.delete = function(cond, callback) {
 		where = [],
 		i = 1;
 
-	for (var x in cond) {
+	for (let x in cond) {
 		where.push(x + ' = $' + i++);
 		values.push(cond[x]);
 	}
