@@ -9,13 +9,7 @@
 <script src="./components/angular/angular.min.js"></script>
 <script src="./components/ng-notify/dist/ng-notify.min.js"></script>
 <script src="https://adodson.com/hello.js/dist/hello.all.min.js"></script>
-<script>
-
-var HTTP_SERVER = {
-	'local.knarly.com' : 'http://localhost:5500'
-}[window.location.host] || '';
-
-</script>
+<script src="./auth-server.js"></script>
 <script src="./client_ids.js"></script>
 <script src="./controller.js"></script>
 <script src="https://adodson.com/adorn/adorn.js"></script>
@@ -69,17 +63,17 @@ button.signin{
 
 <h2>Signin</h2>
 
-<button ng-repeat="item in profiles" ng-click="item.signin()" class="signin" ng-class="{blue:item.name}"><span ng-show="!item.name">Signin with {{item.network}}</span><span ng-show="item.name">Signed in as {{item.name}}</span></button>
+<button ng-click="login()" class="signin" ng-class="{blue:profile.name}"><span ng-show="!profile.name">Signin</span><span ng-show="profile.name">Signed in as {{profile.name}}</span></button>
 
 <h2>Manage apps</h2>
 
-<p class="alert" ng-show="!defaultProfile"><a href="#signin">Signin</a> to manage your apps</p>
+<p class="alert" ng-show="!profile"><a href="#signin">Signin</a> to manage your apps</p>
 
-<div ng-show="!!defaultProfile">
+<div ng-show="!!profile">
 	<p>Place your apps credentials in the table below</p>
 </div>
 
-<div class="table apps" ng-show="!!defaultProfile">
+<div class="table apps" ng-show="!!profile">
 	<div class="table-header">
 		<div class="table-row">
 			<div class="table-cell" ng-repeat="info in fields">{{info.name}}</div>

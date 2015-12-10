@@ -2,10 +2,10 @@
 var debug = require('debug')('status');
 
 var db = require('./db');
-var connect = require('connect');
 
 // Export this module as middleware
-var app = module.exports = connect();
+var app = module.exports = require('express')();
+
 app.use((req, res) => {
 
 	// Database connection still ticking?

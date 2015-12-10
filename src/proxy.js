@@ -3,10 +3,9 @@ var debug = require('debug')('proxy');
 
 var oauthshim = require('../lib/oauth-shim');
 var db = require('./db');
-var connect = require('connect');
 
 // Export this module as middleware
-var app = module.exports = connect();
+var app = module.exports = require('express')();
 
 // Apply the node-oauth-shim
 // app.use('/proxy', oauthshim);

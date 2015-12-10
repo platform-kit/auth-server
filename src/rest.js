@@ -3,7 +3,6 @@ var debug = require('debug')('rest');
 
 // REST
 // Defines the Web API for managing the site
-var connect = require('connect');
 var db = require('./db');
 var param = require('./utils/param');
 var url = require('url');
@@ -35,7 +34,7 @@ heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL
 */
 
 // Export this module as middleware
-var app = module.exports = connect();
+var app = module.exports = require('express')();
 
 app.use((req, res) => {
 

@@ -1,15 +1,12 @@
 'use strict';
 var debug = require('debug')('app');
-var connect = require('connect');
-var serveStatic = require('serve-static');
-var port = process.env.PORT || 5500;
+
+const PORT = process.env.PORT || 5500;
+
+var app = require('express')();
 
 // Connect to the https server
-var app = connect();
-app.listen(port);
-
-// Add redirect
-app.use(require('./utils/http_extend_redirect'));
+app.listen(PORT);
 
 // ENFORCE SSL
 app.use(require('./utils/http_enforce_ssl'));
@@ -24,7 +21,7 @@ app.use((req, res, next) => {
 });
 
 // Static files
-app.use(serveStatic(__dirname + '/../static'));
+app.use(require('serve-static')(__dirname + '/../static'));
 
 // Status
 // Print out a status message
@@ -32,10 +29,15 @@ app.use('/status', require('./status'));
 
 // Listen out for REST API access
 // Serve the database
-app.use('/rest', require('./rest'));
+app.use('/api', (req, res, next) => {debug(res.headerSent); next()}, require('./auth/access'), require('./api'));
+
+/* deprecated */ app.use('/rest', require('./rest'));
 
 // Bind handlers for the proxy service
 app.use('/proxy', require('./proxy'));
 
+// Bind handlers for the proxy service
+app.use('/auth', require('./auth/index'));
+
 // If its setup correctly...
-debug('HTTP server listening on port ' + port);
+debug('HTTP server listening on port %s', PORT);

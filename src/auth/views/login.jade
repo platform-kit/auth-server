@@ -1,0 +1,36 @@
+doctype html
+html
+	head
+		title
+			= "HelloJS federated signin demo"
+		script(src="//adodson.com/adorn/adorn.js", async)
+		script(type='text/javascript').
+			var HELLO_CLIENT_IDS =!{JSON.stringify(client_ids)}
+		script(src="./login.js")
+		link(rel="icon", href="//adodson.com/favicon.ico")
+		link(rel="stylesheet", href="//adodson.com/adorn/adorn.css")
+
+	body
+
+		include head
+
+		if query && query.redirect_uri
+			a(href=query.redirect_uri + "?error=cancelled")= "Cancel"
+
+			if user
+				a(class="button",href=query.redirect_uri + "?" + auth_response)= "Continue..."
+
+		h2= "Connections"
+
+		each val, key in client_ids
+			if user && user.connections && user.connections[key]
+				- var profile = user.connections[key];
+				p
+					if profile.picture
+						img(src=profile.picture, width=50)
+					= "Hello " + profile.displayName + " via " + key
+			else
+				div(class=key)
+					button.login(onclick="login('#{key}')")
+						= "Signin with " + key
+

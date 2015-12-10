@@ -27,7 +27,8 @@ function DB(conn) {
 DB.prototype.table = 'apps';
 
 // Extend the default database
-DB.prototype.query = function() {
+DB.prototype.query = function(sql, cond) {
+	debug(sql, cond);
 	return this.client.query.apply(this.client, arguments);
 };
 
@@ -45,7 +46,6 @@ DB.prototype.insert = function(data, callback) {
 		values.push(data[x]);
 	}
 	var sql = 'INSERT INTO ' + this.table + '(' + keys.join(',') + ') VALUES( ' + temp.join(',') + ' ) RETURNING *';
-	debug(sql);
 	return this.query(sql, values, callback);
 };
 
@@ -65,7 +65,6 @@ DB.prototype.update = function(data, cond, callback) {
 		values.push(cond[x]);
 	}
 	var sql = 'UPDATE ' + this.table + ' SET ' + set.join(',') + ' WHERE ' + where.join(' AND ');
-	debug(sql);
 	return this.query(sql, values, callback);
 };
 
@@ -82,6 +81,5 @@ DB.prototype.delete = function(cond, callback) {
 	}
 
 	var sql = 'DELETE FROM ' + this.table + ' WHERE ' + where.join(' AND ');
-	debug(sql);
 	return this.query(sql, values, callback);
 };
