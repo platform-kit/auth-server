@@ -12,6 +12,7 @@
 				auth: base + 'auth/login',
 				grant: base + 'auth/token'
 			},
+			refresh: true,
 			base: base + 'api/',
 			get: {
 				me: 'me'

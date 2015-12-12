@@ -39,8 +39,10 @@ app.use('/:key', (req, res, next) => {
 	}
 	else {
 		res.json({
-			error: 'unauthorized',
-			message: 'You do not have permission to access this'
+			error: {
+				code: 'unauthorized',
+				message: 'You do not have permission to access this'
+			}
 		});
 	}
 });
@@ -87,8 +89,13 @@ app.use('/:key/:table?', (req, res) => {
 
 	}).then(null, (err) => {
 		// Push error response
-		res.json(err);
-	})
+		res.json({
+			error: {
+				code: err.error,
+				message: err.details
+			}
+		});
+	});
 });
 
 function rest(table, method, query, body) {

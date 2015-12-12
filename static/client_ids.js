@@ -9,7 +9,7 @@
 
 // To make it a little easier
 var CLIENT_IDS = {
-	authserver: '0000000001'
+	authserver: '9fa6205934cd495b4a3a50795cf77990'
 };
 
 var REDIRECT_URI = './redirect.html';

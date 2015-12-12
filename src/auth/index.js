@@ -28,10 +28,10 @@ app.use(function(req, res, next) {
 	next();
 });
 
-// Bind handlers for the proxy service
+// Bind handlers for login page
 app.all('/login', require('./login'));
 
-// Bind handlers for the proxy service
+// Bind handlers for the thirdparty Oauth handler
 app.all('/redirect', require('./redirect'));
 
 // Notice

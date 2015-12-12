@@ -17,12 +17,13 @@ app.set('views', __dirname + '/views');
 
 // Get the Services which we're going to identify with
 var AuthServices = {
+	facebook: [2, require('passport-facebook').Strategy, (data) => {if (data.id) {data.picture = 'https://graph.facebook.com/' + data.id + '/picture';}}],
 	github: [2, require('passport-github').Strategy, (data) => {data.picture = data._json.avatar_url;}],
 	google: [2, require('passport-google-oauth').OAuth2Strategy, (data) => {if (data.photos && data.photos.length) data.picture = data.photos[0].value;}],
 	// linkedin: [1, require('passport-linkedin').Strategy],
 	twitter: [1, require('passport-twitter').Strategy, () => {}],
-	windows: [2, require('passport-windowslive').Strategy, (data) => {if (data.photos && data.photos.length) data.picture = data.photos[0].value;}]
-	// yahoo: [1, require('passport-yahoo-oauth').Strategy]
+	windows: [2, require('passport-windowslive').Strategy, (data) => {if (data.photos && data.photos.length) data.picture = data.photos[0].value;}],
+	yahoo: [1, require('passport-yahoo-oauth').Strategy, (data) => {}]
 }
 
 // INSTALL
@@ -74,11 +75,16 @@ app.all('*',
 	(req, res, next) => {
 
 		// Add additional information to the state parameter
-		let state = JSON.parse(req.query.state);
-		let network = state.network;
-		req.query.oauth = {
-			grant: strategies[network]._oauth2._accessTokenUrl
-		};
+		if (req.query.state) {
+			let state = JSON.parse(req.query.state);
+			debug(state);
+			let network = state.network;
+			if (!state.oauth) {
+				req.query.oauth = {
+					grant: strategies[network]._oauth2._accessTokenUrl
+				};
+			}
+		}
 
 		next();
 	},
@@ -124,6 +130,8 @@ app.all('*',
 // Was the login for this server
 // auth-server maintains its own list of users
 function handleGrantedAuthorization(req, res, next) {
+
+	debug(req.oauthshim);
 
 	if (req.oauthshim && req.oauthshim.data && req.oauthshim.redirect) {
 
@@ -271,10 +279,10 @@ function getUserById(userId) {
 
 function getUserByConnectionId(network, conn_id) {
 
-	let cond = {}
-	cond[network + '_id'] = conn_id;
-
-	return db('users').get(['*'], cond);
+	return db.query('SELECT * FROM users WHERE ' + network + '_id LIKE \'%' + conn_id + '%\' LIMIT 1')
+	.then((data) => {
+		return data.rows.length ? data.rows[0] : undefined;
+	});
 }
 
 function createUserFromConnection(network, profileData) {
@@ -292,7 +300,7 @@ function createUserFromConnection(network, profileData) {
 	.insert(post)
 	.then((data) => {
 		// Found the user, associate this session with them
-		return data.rows.length >= 1 ? data.rows[0].id : undefined;
+		return data.id;
 	});
 }
 
@@ -310,7 +318,7 @@ function updateUserConnection(network, userData, profileData) {
 	}
 
 	if (!userData.picture && profileData.picture) {
-		post.name = profileData.picture;
+		post.picture = profileData.picture;
 	}
 
 	debug('Updating user connection');

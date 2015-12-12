@@ -32,8 +32,10 @@ module.exports = (req, res, next) => {
 
 	// Render a json error message
 	res.json({
-		error: 'unauthorized',
-		error_message: message
+		error: {
+			code: 'unauthorized',
+			message: message
+		}
 	});
 
 };

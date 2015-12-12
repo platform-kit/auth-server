@@ -1,11 +1,11 @@
 module.exports = [
-	// {
-	// 	'name': 'facebook',
-	// 	'domain': 'local.knarly.com auth-server.herokuapp.com',
-	// 	'client_id': process.env.FACEBOOK_ID,
-	// 	'client_secret': process.env.FACEBOOK_SECRET,
-	// 	'grant_url': 'https://graph.facebook.com/oauth/access_token'
-	// },
+	{
+		'name': 'facebook',
+		'domain': 'local.knarly.com auth-server.herokuapp.com',
+		'client_id': process.env.FACEBOOK_ID,
+		'client_secret': process.env.FACEBOOK_SECRET,
+		'grant_url': 'https://graph.facebook.com/oauth/access_token'
+	},
 	{
 		'name': 'github',
 		'domain': 'localhost auth-server.herokuapp.com',
@@ -33,5 +33,12 @@ module.exports = [
 		'client_id': process.env.WINDOWS_ID,
 		'client_secret': process.env.WINDOWS_SECRET,
 		'grant_url': 'https://login.live.com/oauth20_token.srf'
+	},
+	{
+		'name': 'yahoo',
+		'domain': 'local.knarly.com auth-server.herokuapp.com',
+		'client_id': process.env.YAHOO_ID,
+		'client_secret': process.env.YAHOO_SECRET,
+		'grant_url': ''
 	}
 ];

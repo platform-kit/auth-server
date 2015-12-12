@@ -18,7 +18,7 @@ html
 			a(href=query.redirect_uri + "?error=cancelled")= "Cancel"
 
 			if user
-				a(class="button",href=query.redirect_uri + "?" + auth_response)= "Continue..."
+				a(class="button",href="?" + auth_response + "&redirect_uri=" + query.redirect_uri)= "Continue..."
 
 		h2= "Connections"
 

@@ -110,7 +110,7 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 
 				// Does it exist
 				var b = $scope.apps.filter(function(_app) {
-					return _app.guid === app.guid;
+					return _app.id === app.id;
 				}).length;
 
 				// Do we need to insert it?
