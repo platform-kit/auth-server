@@ -1,36 +1,46 @@
+mixin continue
+	if query && query.redirect_uri
+		a(href=query.redirect_uri + "?error=cancelled&state=" + query.state)= "Cancel"
+		=" "
+		if user
+			a(class="button green",href="?" + auth_response + "&redirect_uri=" + query.redirect_uri)= "Continue..."
+
 doctype html
 html
 	head
 		title
 			= "HelloJS federated signin demo"
-		script(src="//adodson.com/adorn/adorn.js", async)
 		script(type='text/javascript').
 			var HELLO_CLIENT_IDS =!{JSON.stringify(client_ids)}
 		script(src="./login.js")
 		link(rel="icon", href="//adodson.com/favicon.ico")
 		link(rel="stylesheet", href="//adodson.com/adorn/adorn.css")
+		link(rel="stylesheet", href="//adodson.com/css-social-buttons/css/zocial.css")
+		link(rel="stylesheet", href="./profile.css")
 
 	body
 
 		include head
 
-		if query && query.redirect_uri
-			a(href=query.redirect_uri + "?error=cancelled")= "Cancel"
-
-			if user
-				a(class="button",href="?" + auth_response + "&redirect_uri=" + query.redirect_uri)= "Continue..."
+		+continue
 
 		h2= "Connections"
+		div.connections
+			each val, key in client_ids
+				if user && user.connections && user.connections[key]
+					- var profile = user.connections[key];
+					p
+						span(class="icon zocial " + key)
+						= " logged in as "
+						if profile.picture
+							img(src=profile.picture, width=50)
+						b
+							= profile.displayName
+				else
+					div(class=key)
+						button.login(onclick="login('#{key}')", class="zocial " + key)
+							= "Connect via " + key
 
-		each val, key in client_ids
-			if user && user.connections && user.connections[key]
-				- var profile = user.connections[key];
-				p
-					if profile.picture
-						img(src=profile.picture, width=50)
-					= "Hello " + profile.displayName + " via " + key
-			else
-				div(class=key)
-					button.login(onclick="login('#{key}')")
-						= "Signin with " + key
-
+		if user
+			h2="Continue"
+			+continue

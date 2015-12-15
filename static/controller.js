@@ -79,12 +79,21 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 	};
 
 	// Profiles
-	$scope.profile = {};
+	$scope.profile = null;
 
 	// Login
 	// Trigger authentication
 	$scope.login = function() {
-		hello('authserver').login();
+		hello('authserver').login({force:true});
+	};
+	$scope.logout = function() {
+		hello('authserver')
+		.logout({force:true})
+		.then(function(){
+			$scope.profile = null;
+			$scope.apps = [];
+			$scope.$apply();
+		});
 	};
 
 	// Get the user credentials

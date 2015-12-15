@@ -36,6 +36,16 @@ window.login = function(network) {
 			token: 'https://api.login.yahoo.com/oauth/v2/get_token'
 		};
 	}
+	if (network === 'twitter') {
+		var base = 'https://api.twitter.com/';
+		state.oauth = {
+			version: '1.0a',
+			auth: base + 'oauth/authenticate',
+			request: base + 'oauth/request_token',
+			token: base + 'oauth/access_token'
+		};
+	}
+
 	state.network = network;
 	state.client_id = client_id;
 	window.location.href = paths[network] + '&client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect_uri) + '&response_type=code&state=' + encodeURIComponent(JSON.stringify(state));

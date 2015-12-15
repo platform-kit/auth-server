@@ -77,7 +77,6 @@ app.all('*',
 		// Add additional information to the state parameter
 		if (req.query.state) {
 			let state = JSON.parse(req.query.state);
-			debug(state);
 			let network = state.network;
 			if (!state.oauth) {
 				req.query.oauth = {
@@ -131,8 +130,6 @@ app.all('*',
 // auth-server maintains its own list of users
 function handleGrantedAuthorization(req, res, next) {
 
-	debug(req.oauthshim);
-
 	if (req.oauthshim && req.oauthshim.data && req.oauthshim.redirect) {
 
 		var data = req.oauthshim.data;
@@ -141,14 +138,11 @@ function handleGrantedAuthorization(req, res, next) {
 		// Was this an OAuth Login response and does it contain a new access_token?
 		if ('access_token' in data && !('path' in opts)) {
 
-			// Store this access_token
-			debug('Session created', data.access_token.substr(0, 8) + '...');
-
-			// Data
-			debug(data);
-
 			// What is the network name
 			var network = toJSON(data.state).network;
+
+			// Store this access_token
+			debug('Session created', network, data.access_token.substr(0, 8) + '...');
 
 			// Promisify the passport strategies
 			var chain = promisify(strategies[network].userProfile).bind(strategies[network])
@@ -162,6 +156,7 @@ function handleGrantedAuthorization(req, res, next) {
 				data.oauth_token = a[0];
 				data.oauth_token_secret = a[1];
 
+				debug('OAuth1', data);
 				chain = chain(data.oauth_token, data.oauth_token_secret, data);
 			}
 			else {
@@ -170,6 +165,8 @@ function handleGrantedAuthorization(req, res, next) {
 
 			// Format profile response
 			chain.then((data) => {
+				//
+				debug(data);
 				// format the response
 				if (data) {
 					AuthServices[network][2](data);
@@ -196,20 +193,20 @@ function handleGrantedAuthorization(req, res, next) {
 			},
 			(err) => {
 
+				// Log error
+				debug(err);
+
 				// Initiate the properties which are passed to the rendered document
 				let options = {
 					session: req.session
 				};
 
 				// Duplicate?
-				if (err.message.match('duplicate')) {
+				if (err.message && err.message.match('duplicate')) {
 					// Error: the connection being linked is assigned to another account
 					options.message = 'Snap, this connection is linked to another account. \
 										It will have to be unlinked from the other account before it can be associated with this account';
 				}
-
-				// Log error
-				debug(err);
 
 				// Display error page
 				res.render('error', options);

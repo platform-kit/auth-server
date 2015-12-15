@@ -63,7 +63,7 @@ button.signin{
 
 <h2>Signin</h2>
 
-<button ng-click="login()" class="signin" ng-class="{blue:profile.name}"><span ng-show="!profile.name">Signin</span><span ng-show="profile.name">Signed in as {{profile.name}}</span></button>
+<button ng-click="login()" class="signin" ng-class="{blue:profile}"><span ng-show="!profile">Signin</span><span ng-show="profile">Signed in as {{profile.name || 'n/a'}}</span></button> <a ng-show="profile" ng-click="logout()">Logout</a>
 
 <h2>Manage apps</h2>
 

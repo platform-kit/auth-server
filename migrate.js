@@ -1,4 +1,6 @@
 #! /usr/bin/node
+// DEBUG=migrate node migrate.js
+
 'use strict';
 var debug = require('debug')('migrate');
 

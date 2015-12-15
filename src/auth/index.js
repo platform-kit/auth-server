@@ -34,5 +34,8 @@ app.all('/login', require('./login'));
 // Bind handlers for the thirdparty Oauth handler
 app.all('/redirect', require('./redirect'));
 
+// Bind handlers for the thirdparty Oauth handler
+app.all('/logout', require('./logout'));
+
 // Notice
 debug('auth ready');

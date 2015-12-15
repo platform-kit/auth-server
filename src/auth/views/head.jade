@@ -1,14 +1,13 @@
 if user
 
-	if user.picture
-		img(src=user.picture,width=50)
+	div.profile
 
-	if user.name
-		p= "Hey " + user.name
+		if user.picture
+			img(src=user.picture,width=50)
 
-	if user.id
-		p= "#" + user.id
+		if user.name
+			p= "Hey " + user.name
 
-	a(href="./logout")= "Signout"
+		a(href="./logout")= "Signout"
 
 

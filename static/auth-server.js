@@ -12,6 +12,16 @@
 				auth: base + 'auth/login',
 				grant: base + 'auth/token'
 			},
+			login: function(p) {
+				// Reauthenticate
+				if (p.options.force) {
+					p.qs.force = 'true';
+				}
+			},
+			logout: function(p) {
+				// return a path to follow
+				return base + 'auth/logout';
+			},
 			refresh: true,
 			base: base + 'api/',
 			get: {

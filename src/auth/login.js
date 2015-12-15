@@ -31,6 +31,7 @@ app.use((req, res, next) => {
 
 	// Whitelist a granted application?
 	// Read the access_token to add the application to the list of approved_apps.
+	// This is used internally to handle a successful login.
 	if (req.query.access_token && req.query.redirect_uri) {
 		// Decode the access_token
 		let json = crypt.decrypt(req.query.access_token);
@@ -129,7 +130,8 @@ app.use((req, res, next) => {
 		}
 
 		// Redirect back to the redirect_uri with auth response
-		if (authResponse && user && user.approved_apps.indexOf(clientId) >= 0) {
+		// Unless the force=true in the query
+		if (authResponse && user && user.approved_apps.indexOf(clientId) >= 0 && req.query.force !== 'true') {
 			// Authenticated
 			debug("redirect re-authenticated", req.query.redirect_uri);
 			res.redirect(req.query.redirect_uri + '?' + authResponse);
@@ -142,8 +144,6 @@ app.use((req, res, next) => {
 			res.redirect(req.query.redirect_uri + '?' + qs.stringify({error: 'unauthenticated', error_message: 'Unable to refresh the users session'}));
 			return;
 		}
-
-		debug('Render login page');
 
 		// Render the login page
 		res.render('login', {
