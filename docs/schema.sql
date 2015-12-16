@@ -26,6 +26,7 @@ CREATE TABLE users (
 	-- Basic
 	name VARCHAR,
 	picture VARCHAR,
+	email VARCHAR,
 
 	-- Facebook
 	facebook_id VARCHAR UNIQUE,

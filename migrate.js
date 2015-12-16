@@ -24,6 +24,11 @@ db.query('SELECT * FROM apps ORDER BY LENGTH(admin_id) DESC', [], (err, resp) =>
 		// Convert the ids into a condition
 		var condition = [];
 
+		if (!item.admin_id) {
+			next();
+			return;
+		}
+
 		// Extract the credentials
 		item.admin_id.split(/[\s,]/).forEach((admin_id) => {
 			let m = admin_id.split('@');
