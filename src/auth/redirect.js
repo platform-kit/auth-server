@@ -17,13 +17,13 @@ app.set('views', __dirname + '/views');
 
 // Get the Services which we're going to identify with
 var AuthServices = {
-	facebook: [2, require('passport-facebook').Strategy, (data) => {if (data.id) {data.picture = 'https://graph.facebook.com/' + data.id + '/picture';}}],
-	github: [2, require('passport-github').Strategy, (data) => {data.picture = data._json.avatar_url;}],
-	google: [2, require('passport-google-oauth').OAuth2Strategy, (data) => {if (data.photos && data.photos.length) data.picture = data.photos[0].value;}],
-	// linkedin: [1, require('passport-linkedin').Strategy],
-	twitter: [1, require('passport-twitter').Strategy, () => {}],
-	windows: [2, require('passport-windowslive').Strategy, (data) => {if (data.photos && data.photos.length) data.picture = data.photos[0].value;}],
-	yahoo: [1, require('passport-yahoo-oauth').Strategy, (data) => {}]
+	facebook: [2, require('passport-facebook').Strategy, {profileFields:'id,displayName,email'.split(',')}, (data) => {if (data.id) {data.picture = 'https://graph.facebook.com/' + data.id + '/picture';}}],
+	github: [2, require('passport-github').Strategy, {}, (data) => {data.picture = data._json.avatar_url;}],
+	google: [2, require('passport-google-oauth').OAuth2Strategy],
+	// linkedin: [1, require('passport-linkedin').Strategy, {}],
+	twitter: [1, require('passport-twitter').Strategy],
+	windows: [2, require('passport-windowslive').Strategy],
+	yahoo: [1, require('passport-yahoo-oauth').Strategy]
 }
 
 // INSTALL
@@ -31,7 +31,7 @@ var AuthServices = {
 
 // OAuth-Shim
 // Configure OAuth-Shim with the credentials to use.
-var creds = require('./credentials.js');
+var creds = require('./credentials.js').credentials;
 
 // Passport Profile
 // Configure PassportJS's Google service
@@ -47,22 +47,23 @@ creds.forEach((cred) => {
 
 	var service_oauth_version = service[0];
 	var constructor = service[1];
+	var opts = service[2] || {};
 
 	if (service_oauth_version === 2) {
-		strategies[network] = new constructor({
+		strategies[network] = new constructor(merge({
 			clientID: cred.client_id,
 			clientSecret: cred.client_secret,
 			callbackURL: 'https://blank'
-		}, () => {
+		}, opts), () => {
 			debug(arguments);
 		});
 	}
 	else if (service_oauth_version === 1) {
-		strategies[network] = new constructor({
+		strategies[network] = new constructor(merge({
 			consumerKey: cred.client_id,
 			consumerSecret: cred.client_secret,
 			callbackURL: 'https://blank'
-		}, () => {
+		}, opts), () => {
 			debug(arguments);
 		});
 	}
@@ -169,7 +170,12 @@ function handleGrantedAuthorization(req, res, next) {
 				debug(data);
 				// format the response
 				if (data) {
-					AuthServices[network][2](data);
+					// custom formatter
+					if (AuthServices[network][3]) {
+						AuthServices[network][3](data);
+					}
+					// Generic formatter
+					formatPassportResponse(data);
 				}
 				return data;
 			})
@@ -318,6 +324,11 @@ function updateUserConnection(network, userData, profileData) {
 		post.picture = profileData.picture;
 	}
 
+	if (!userData.email && profileData.email) {
+		post.email = profileData.email;
+	}
+	debug(profileData.email);
+
 	debug('Updating user connection');
 
 	return db('users')
@@ -326,4 +337,21 @@ function updateUserConnection(network, userData, profileData) {
 		// Found the user, associate this session with them
 		return userData.id;
 	});
+}
+
+
+function merge(a,b){
+	for(var x in b) {
+		a[x] = b[x];
+	}
+	return a;
+}
+
+function formatPassportResponse(data) {
+	if (data.photos && data.photos.length) {
+		data.picture = data.photos[0].value;
+	}
+	if (data.emails  && data.emails.length) {
+		data.email = data.emails[0].value;
+	}
 }

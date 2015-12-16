@@ -17,13 +17,22 @@ app.set('views', __dirname + '/views');
 
 // OAuth-Shim
 // Configure OAuth-Shim with the credentials to use.
-var creds = require('./credentials.js');
+var creds = require('./credentials.js').credentials;
+const REDIRECT_URI = require('./credentials.js').redirect_uri;
 
-// Convert credentials into client_ids for HelloJS
-var client_ids = {};
+// Build URL's for the credentials
 creds.forEach((cred) => {
-	client_ids[cred.name] = cred.client_id;
+
+	// Pass some basic information back to the OAuthShim
+	cred.state = cred.state || {};
+	cred.state.redirect_uri = REDIRECT_URI;
+	cred.state.network = cred.name;
+	cred.state.client_id = cred.client_id;
+
+	// Create url...
+	cred.url = cred.auth + '&client_id=' + cred.client_id + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) + '&response_type=code&state=' + encodeURIComponent(JSON.stringify(cred.state));
 });
+
 
 // Continue...
 // White list an outbound access_token...
@@ -147,7 +156,7 @@ app.use((req, res, next) => {
 
 		// Render the login page
 		res.render('login', {
-			client_ids: client_ids,
+			credentials: creds,
 			user: user,
 			query: req.query,
 			auth_response: authResponse

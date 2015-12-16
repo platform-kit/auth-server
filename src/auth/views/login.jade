@@ -10,11 +10,8 @@ html
 	head
 		title
 			= "HelloJS federated signin demo"
-		script(type='text/javascript').
-			var HELLO_CLIENT_IDS =!{JSON.stringify(client_ids)}
-		script(src="./login.js")
-		link(rel="icon", href="//adodson.com/favicon.ico")
-		link(rel="stylesheet", href="//adodson.com/adorn/adorn.css")
+		include meta
+
 		link(rel="stylesheet", href="//adodson.com/css-social-buttons/css/zocial.css")
 		link(rel="stylesheet", href="./profile.css")
 
@@ -26,21 +23,23 @@ html
 
 		h2= "Connections"
 		div.connections
-			each val, key in client_ids
-				if user && user.connections && user.connections[key]
-					- var profile = user.connections[key];
+			for cred in credentials
+				if user && user.connections && user.connections[cred.name]
+					- var profile = user.connections[cred.name];
 					p
-						span(class="icon zocial " + key)
+						span(class="icon zocial " + cred.name)
 						= " logged in as "
 						if profile.picture
 							img(src=profile.picture, width=50)
 						b
 							= profile.displayName
 				else
-					div(class=key)
-						button.login(onclick="login('#{key}')", class="zocial " + key)
-							= "Connect via " + key
+					div(class=cred.name)
+						a.button(href=cred.url, class="zocial " + cred.name)
+							= "Connect via " + cred.name
 
 		if user
 			h2="Continue"
-			+continue
+
+		+continue
+

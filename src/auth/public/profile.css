@@ -14,6 +14,8 @@ img {
 }
 .profile img {
   width: 100px;
+  height: 100px;
+  background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxnPgogIDxjaXJjbGUgcj0iMzAiIGN5PSIzMCIgY3g9IjUwIiBzdHJva2Utd2lkdGg9IjAiIGZpbGw9IiNiN2I3YjciLz4KICA8Y2lyY2xlIHI9IjQ1IiBjeT0iMTAwIiBjeD0iNTAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iI2I3YjdiNyIvPgogPC9nPgo8L3N2Zz4=");
 }
 .connections img {
   margin: 0 0.5em;
