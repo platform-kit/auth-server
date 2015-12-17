@@ -100,7 +100,7 @@ app.use('/:key/:table?', (req, res) => {
 
 	}).then(null, (err) => {
 		// Requet error
-		err.code = "data_integrity";
+		err.code = 'data_integrity';
 
 		// Push error response
 		res.json({error: err});
