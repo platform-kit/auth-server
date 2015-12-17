@@ -27,7 +27,7 @@
     "passport-google-oauth": "^0.2.0",
     "passport-twitter": "^1.0.3",
     "passport-windowslive": "^1.0.1",
-    "passport-yahoo-oauth": "MrSwitch/passport-yahoo-oauth#latest",
+    "passport-yahoo-oauth": "MrSwitch/passport-yahoo-oauth",
     "pg": "0.6.15",
     "promisify-node": "^0.3.0",
     "serve-static": "^1.9.1"
