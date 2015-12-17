@@ -2,12 +2,32 @@
 
 var debug = require('debug')('db');
 var pg = require('pg');
-var promisify = require('promisify-node');
 var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL || 'tcp://postgres:root@localhost/auth-server';
-var client;
 
 // Export the function DB
 module.exports = DB;
+
+// Start a new connection to the database
+var client = new Promise((resolve, reject) => {
+
+	// Set the client
+	let agent = new pg.Client(conn);
+	agent.connect((err) => {
+
+		// Connected to DB?
+		if (err) {
+			debug('Failed to connected to POSTGRESQL ' + conn, err);
+			reject({message: 'Failed to connect to DB'});
+			return;
+		}
+
+		// Connected
+		debug('Connected to POSTGRESQL ' + conn);
+
+		// Resolve connection
+		resolve(agent);
+	});
+});
 
 function DB(table) {
 	return DB.use(table);
@@ -20,45 +40,27 @@ DB.use = function(table) {
 };
 
 // Run the query
-DB.query = function(sql, cond) {
+DB.query = function(sql, values) {
 
-	debug(sql, cond);
+	return client.then((agent) => {
+		// Run the query
+		return new Promise((resolve, reject) => {
+			agent.query(sql, values, (err, resp) => {
 
-	if (client) {
-		// Return the client promise
-		return client.apply(client, arguments);
-	}
-
-	return new Promise((resolve, reject) => {
-		// Set the client
-		let agent = new pg.Client(conn);
-		agent.connect((err) => {
-
-			// Connected to DB?
-			if (err) {
-				debug('Failed to connected to POSTGRESQL ' + conn, err);
-				reject('Failed to connect to DB');
-				return;
-			}
-
-			// Connected
-			debug('Connected to POSTGRESQL ' + conn);
-
-			// Define the client, we dont want to check this everytime
-			client = promisify(agent.query).bind(agent);
-
-			// Run the query
-			client.apply(client, arguments).then((resp) => {
-				debug(resp);
-				resolve(resp);
-			}, (err) => {
-				debug(err.message);
-				reject({
-					message: err.message
-				});
+				if (err) {
+					debug(err.message);
+					reject({
+						message: err.message
+					});
+				}
+				else {
+					debug(resp);
+					resolve(resp);
+				}
 			});
 		});
 	});
+
 }
 
 // Get

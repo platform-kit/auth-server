@@ -131,8 +131,10 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 		});
 	});
 
-	hello.init(CLIENT_IDS, {
-		redirect_uri: REDIRECT_URI,
+	hello.init({
+		authserver: '9fa6205934cd495b4a3a50795cf77990'
+	}, {
+		redirect_uri: '/redirect.html',
 		oauth_proxy: '/proxy'
 	});
 
