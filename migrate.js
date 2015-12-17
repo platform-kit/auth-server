@@ -10,7 +10,7 @@ var debug = require('debug')('migrate');
 // Loop through the existing users
 var db = require('./src/db');
 
-db.query('SELECT * FROM apps ORDER BY LENGTH(admin_id) DESC', [], (err, resp) => {
+db.query('SELECT * FROM apps WHERE user_id IS NULL ORDER BY LENGTH(admin_id) DESC', [], (err, resp) => {
 
 	// How many apps are there
 	debug('Found %d', resp.rows.length);
@@ -45,7 +45,7 @@ db.query('SELECT * FROM apps ORDER BY LENGTH(admin_id) DESC', [], (err, resp) =>
 				debug('Duplicate network values %s', ids[network].join(' '));
 			}
 
-			condition.push(network + ' ~* \'\\y' + id + '\\y\'');
+			condition.push(network + ' ~* \'\\\\y' + id + '\\\\y\'');
 		});
 
 		let sql = 'SELECT * FROM users WHERE ' + condition.join(' OR ');
