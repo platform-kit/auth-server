@@ -2,7 +2,19 @@
 
 var debug = require('debug')('db');
 var pg = require('pg');
-var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL || 'tcp://postgres:root@localhost/auth-server';
+var url = require('url');
+var conn = (process.env.HEROKU_POSTGRESQL_BLUE_URL || 'tcp://postgres:root@localhost/auth-server') + '?ssl=true';
+
+// conn = url.parse(conn);
+// conn.ssl = true;
+
+// var params = {
+// 	host: conn.host,
+// 	user: conn.auth.split(':')[0],
+// 	password: conn.auth.split(':')[1],
+// 	database: conn.pathname.replace('\/',''),
+// 	ssl: true
+// };
 
 module.exports = new DB(conn);
 
@@ -10,6 +22,8 @@ function DB(conn) {
 	if (!(this instanceof DB)) {
 		return new DB();
 	}
+
+	debug('DB', conn);
 
 	this.client = new pg.Client(conn);
 	this.client.connect((err) => {

@@ -45,7 +45,7 @@ db.query('SELECT * FROM apps ORDER BY LENGTH(admin_id) DESC', [], (err, resp) =>
 				debug('Duplicate network values %s', ids[network].join(' '));
 			}
 
-			condition.push(network + ' ~* \'\\y' + id + '\\y\'');
+			condition.push(network + ' ~* \'\\\\y' + id + '\\\\y\'');
 		});
 
 		let sql = 'SELECT * FROM users WHERE ' + condition.join(' OR ');
