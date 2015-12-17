@@ -18,7 +18,7 @@ CREATE TABLE client_apps(
 	user_id INTEGER NOT NULL
 )
 
-INSERT INTO client_apps (redirect_uri, name, user_id) VALUES ('auth-server.herokuapp.com, local.knarly.com', 'Auth-Server Login', 0) RETURNING *
+INSERT INTO client_apps (client_id, client_secret, redirect_uri, name, user_id) VALUES ('9fa6205934cd495b4a3a50795cf77990', '7e1e19ecfbabc795438b93dd7843fcff', 'auth-server.herokuapp.com, local.knarly.com', 'Auth-Server Login', 0) RETURNING *
 
 CREATE TABLE users (
 	id SERIAL NOT NULL PRIMARY KEY,
