@@ -29,9 +29,7 @@ app.use('/status', require('./status'));
 
 // Listen out for REST API access
 // Serve the database
-app.use('/api', (req, res, next) => {debug(res.headerSent); next()}, require('./auth/access'), require('./api'));
-
-/* deprecated */ app.use('/rest', require('./rest'));
+app.use('/api', require('./auth/access'), require('./api'));
 
 // Bind handlers for the proxy service
 app.use('/proxy', require('./proxy'));
