@@ -2,7 +2,7 @@
 var debug = require('debug')('proxy');
 
 var oauthshim = require('../lib/oauth-shim');
-var db = require('./db');
+var db = require('./api/db');
 
 // Export this module as middleware
 var app = module.exports = require('express')();
@@ -63,26 +63,23 @@ app.use((req, res, next) => {
 				// Modify the record in the database.
 				var id = opts.client_id;
 
-				db.query(
-					'SELECT grant_url FROM apps WHERE client_id = $1 LIMIT 1',
-					[id],
-					function(err, result) {
-						if (err) {
+				db('apps')
+				.get(['grant_url'], {client_id: id})
+				.then((row) => {
+					if (!row.grant_url) {
+						// Update DB
+						db('apps')
+						.update({grant_url: (opts.oauth.grant || opts.oauth.token)}, {client_id: id})
+						.then((res) => {
+							debug(res);
+						}, (err) => {
 							debug(err);
-						}
-						else if (result.rows[0] && !result.rows[0].grant_url) {
-							// Update DB
-							db.update({
-								grant_url: (opts.oauth.grant || opts.oauth.token)
-							}, {
-								client_id: id
-							}, function(err, result) {
-								debug(err || result);
-							});
-						}
-
+						});
 					}
-				);
+				})
+				.then(null, (err) => {
+					debug(err);
+				});
 			}
 		}
 	}
@@ -115,12 +112,13 @@ oauthshim.credentials.get = (query, callback) => {
 	// Search the database
 	// Get all the current stored credentials
 	//
-	db.query('SELECT domain, client_id, client_secret, grant_url FROM apps WHERE client_id = $1 LIMIT 1',
-		[query.client_id],
-		(err, result) => {
-
-			// Callback
-			// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
-			callback(result.rows.length ? result.rows[0] : null);
-		});
+	db('apps')
+	.get(['domain', 'client_id', 'client_secret', 'grant_url'], {client_id: query.client_id})
+	.then((row) => {
+		// Callback
+		// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
+		callback(row || null);
+	}, () => {
+		callback(null);
+	});
 };

@@ -86,7 +86,7 @@ DB.getAll = function(fields, cond, options) {
 		opts.push(x + ' ' + options[x]);
 	}
 
-	return this.query('SELECT ' + fields.join(',') + ' FROM ' + this.table + ' WHERE ' + where.join(' AND ') + ' ' + opts.join(' '), values);
+	return this.query('SELECT ' + fields.join(',') + ' FROM ' + this.table + (where.length ? ' WHERE ' + where.join(' AND ') : '') + ' ' + opts.join(' '), values);
 };
 
 // Insert
