@@ -75,7 +75,7 @@ app.use('/:key/:table?', (req, res) => {
 		res.json({
 			error: {
 				code: 'unsupported_method',
-				message: method.toUpperCase() + ' is an unsupported method on users'
+				message: method.toUpperCase() + ' is an unauthorized method on users'
 			}
 		});
 		return;
@@ -160,15 +160,12 @@ function rest(table, method, query, body) {
 	else if (method === 'delete') {
 
 		// Delete
-		return db(table).update(query);
+		return db(table).delete(query);
 	}
-
-
-
 
 	return Promise.reject({
 		error: 'unsupported_method',
-		details: 'Method not supported'
+		details: method.toUpperCase() + 'is an unsupported method'
 	});
 }
 
