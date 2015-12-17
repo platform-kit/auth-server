@@ -17,7 +17,7 @@ app.set('views', __dirname + '/views');
 
 // Get the Services which we're going to identify with
 var AuthServices = {
-	facebook: [2, require('passport-facebook').Strategy, {profileFields:'id,displayName,email'.split(',')}, (data) => {if (data.id) {data.picture = 'https://graph.facebook.com/' + data.id + '/picture';}}],
+	facebook: [2, require('passport-facebook').Strategy, {profileFields: 'id,displayName,email'.split(',')}, (data) => {if (data.id) {data.picture = 'https://graph.facebook.com/' + data.id + '/picture';}}],
 	github: [2, require('passport-github').Strategy, {}, (data) => {data.picture = data._json.avatar_url;}],
 	google: [2, require('passport-google-oauth').OAuth2Strategy],
 	// linkedin: [1, require('passport-linkedin').Strategy, {}],
@@ -32,6 +32,7 @@ var AuthServices = {
 // OAuth-Shim
 // Configure OAuth-Shim with the credentials to use.
 var creds = require('./credentials.js').credentials;
+const REDIRECT_URI = require('./credentials.js').redirect_uri;
 
 // Passport Profile
 // Configure PassportJS's Google service
@@ -39,6 +40,8 @@ var strategies = {};
 creds.forEach((cred) => {
 
 	var network = cred.name;
+	strategies[network] = cred;
+
 	var service = AuthServices[network];
 
 	if (!service) {
@@ -50,16 +53,23 @@ creds.forEach((cred) => {
 	var opts = service[2] || {};
 
 	if (service_oauth_version === 2) {
-		strategies[network] = new constructor(merge({
+		cred.passport = new constructor(merge({
 			clientID: cred.client_id,
 			clientSecret: cred.client_secret,
 			callbackURL: 'https://blank'
 		}, opts), () => {
 			debug(arguments);
 		});
+
+		// Add OAuth to strategy
+		if (!cred.oauth) {
+			cred.oauth = {
+				grant: strategies[network].passport._oauth2._accessTokenUrl
+			};
+		}
 	}
 	else if (service_oauth_version === 1) {
-		strategies[network] = new constructor(merge({
+		cred.passport = new constructor(merge({
 			consumerKey: cred.client_id,
 			consumerSecret: cred.client_secret,
 			callbackURL: 'https://blank'
@@ -67,6 +77,7 @@ creds.forEach((cred) => {
 			debug(arguments);
 		});
 	}
+
 });
 
 // '/redirect' is the path of the OAuth Shim
@@ -77,13 +88,20 @@ app.all('*',
 
 		// Add additional information to the state parameter
 		if (req.query.state) {
-			let state = JSON.parse(req.query.state);
-			let network = state.network;
-			if (!state.oauth) {
-				req.query.oauth = {
-					grant: strategies[network]._oauth2._accessTokenUrl
-				};
+			let network = req.query.state;
+			if (network in strategies) {
+				// Define current strategy
+				let strategy = strategies[network];
+
+				// Update the query with the oauth parameters for OAuthShim
+				req.query.oauth = strategy.oauth;
+
+				// Attach network
+				req.query.network = network;
+				req.query.client_id = strategy.client_id;
+				req.query.redirect_uri = REDIRECT_URI;
 			}
+			debug(req.query);
 		}
 
 		next();
@@ -104,7 +122,7 @@ app.all('*',
 			// This is a relative path since this feature is relative.
 			res.redirect('.' + req.session.authRequest);
 		}
-		else{
+		else {
 			next();
 		}
 	},
@@ -140,13 +158,13 @@ function handleGrantedAuthorization(req, res, next) {
 		if ('access_token' in data && !('path' in opts)) {
 
 			// What is the network name
-			var network = toJSON(data.state).network;
+			var network = data.state;
 
 			// Store this access_token
 			debug('Session created', network, data.access_token.substr(0, 8) + '...');
 
 			// Promisify the passport strategies
-			var chain = promisify(strategies[network].userProfile).bind(strategies[network])
+			var chain = promisify(strategies[network].passport.userProfile).bind(strategies[network].passport)
 
 			// Is this an OAuth1 requesst
 			var a = data.access_token.split(/[\:\@]/);
@@ -224,16 +242,6 @@ function handleGrantedAuthorization(req, res, next) {
 	}
 	else {
 		next();
-	}
-}
-
-
-function toJSON(str) {
-	try {
-		return JSON.parse(str);
-	}
-	catch (e) {
-		return {};
 	}
 }
 
@@ -340,8 +348,8 @@ function updateUserConnection(network, userData, profileData) {
 }
 
 
-function merge(a,b){
-	for(var x in b) {
+function merge(a, b) {
+	for (var x in b) {
 		a[x] = b[x];
 	}
 	return a;
@@ -351,7 +359,7 @@ function formatPassportResponse(data) {
 	if (data.photos && data.photos.length) {
 		data.picture = data.photos[0].value;
 	}
-	if (data.emails  && data.emails.length) {
+	if (data.emails && data.emails.length) {
 		data.email = data.emails[0].value;
 	}
 }

@@ -70,7 +70,18 @@ app.use('/:key/:table?', (req, res) => {
 	}
 
 
-	//
+	// Do not permit anything other than 'get' on the user table
+	if (table === 'users' && method !== 'get') {
+		res.json({
+			error: {
+				code: 'unsupported_method',
+				message: method.toUpperCase() + ' is an unsupported method on users'
+			}
+		});
+		return;
+	}
+
+	// Make DB call
 	rest(table, method, query, body)
 	.then((data) => {
 
@@ -166,7 +177,7 @@ function query_parts(query) {
 	let cond = {};
 	let opts = {};
 
-	for(let x in query) {
+	for (let x in query) {
 		let value = query[x];
 
 		if (x === 'fields') {
@@ -186,5 +197,5 @@ function query_parts(query) {
 function extend(a, b) {
 	for (let x in b) {
 		a[x] = b[x];
-	};
+	}
 }

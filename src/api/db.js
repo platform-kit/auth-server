@@ -126,9 +126,9 @@ DB.update = function(data, cond) {
 		if (resp.rowCount) {
 			resp.success = true;
 		}
-		else{
+		else {
 			resp.error = true;
-			resp.details = "Did not update any results";
+			resp.details = 'Did not update any results';
 		}
 		return resp;
 	});

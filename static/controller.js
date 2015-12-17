@@ -3,7 +3,7 @@ var app = angular.module('app', ['ngNotify']);
 
 app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function($scope, $filter, $http, ngNotify) {
 
-	var api = hello('authserver');
+	var authServer = hello('authserver');
 
 	// Fields
 	$scope.fields = [
@@ -40,7 +40,7 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 	$scope.postApp = function(app) {
 
 		// Post JSON formatted content
-		api.api('me/apps', 'post', JSON.parse(angular.toJson(app)))
+		authServer.api('me/apps', 'post', JSON.parse(angular.toJson(app)))
 		.then(function(resp) {
 
 			ngNotify.set('Successfully updated records', 'success');
@@ -70,7 +70,7 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 		$scope.apps.splice(index, 1);
 
 		// Post this request off to the server
-		api.api('me/apps', 'delete', {id: app.id})
+		authServer.api('me/apps', 'delete', {id: app.id})
 		.then(function() {
 			ngNotify.set('Successfully deleted record', 'success');
 		}, function(err) {
@@ -84,12 +84,12 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 	// Login
 	// Trigger authentication
 	$scope.login = function() {
-		hello('authserver').login({force:true});
+		authServer.login({force: true});
 	};
 	$scope.logout = function() {
-		hello('authserver')
-		.logout({force:true})
-		.then(function(){
+		authServer
+		.logout({force: true})
+		.then(function() {
 			$scope.profile = null;
 			$scope.apps = [];
 			$scope.$apply();
@@ -97,12 +97,10 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 	};
 
 	// Get the user credentials
-	hello.on('auth.login', function(auth) {
-
-		var auth = hello(auth.network);
+	hello.on('auth.login', function() {
 
 		// Get the user profile
-		auth.api('me', {fields: 'id,name,picture'})
+		authServer.api('me', {fields: 'id,name,picture'})
 		.then(function(o) {
 
 			// Update the Profile
@@ -111,7 +109,7 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 		});
 
 		// Get the users Apps
-		auth.api('me/apps')
+		authServer.api('me/apps')
 		.then(function(resp) {
 
 			// Loop through the rows and add to the list of the users apps.

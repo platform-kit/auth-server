@@ -28,13 +28,11 @@ module.exports = {
 		{
 			'name': 'twitter',
 			'auth': 'redirect?',
-			'state': {
-				'oauth': {
-					'version': '1.0a',
-					'auth': 'https://api.twitter.com/oauth/authenticate',
-					'request': 'https://api.twitter.com/oauth/request_token',
-					'token': 'https://api.twitter.com/oauth/access_token'
-				}
+			'oauth': {
+				'version': '1.0a',
+				'auth': 'https://api.twitter.com/oauth/authenticate',
+				'request': 'https://api.twitter.com/oauth/request_token',
+				'token': 'https://api.twitter.com/oauth/access_token'
 			},
 			'domain': 'localhost auth-server.herokuapp.com',
 			'client_id': process.env.TWITTER_ID,
@@ -52,13 +50,11 @@ module.exports = {
 		{
 			'name': 'yahoo',
 			'auth': 'redirect?',
-			'state': {
-				'oauth' : {
-					'version': '1.0a',
-					'auth': 'https://api.login.yahoo.com/oauth/v2/request_auth',
-					'request': 'https://api.login.yahoo.com/oauth/v2/get_request_token',
-					'token': 'https://api.login.yahoo.com/oauth/v2/get_token'
-				}
+			'oauth': {
+				'version': '1.0a',
+				'auth': 'https://api.login.yahoo.com/oauth/v2/request_auth',
+				'request': 'https://api.login.yahoo.com/oauth/v2/get_request_token',
+				'token': 'https://api.login.yahoo.com/oauth/v2/get_token'
 			},
 			'domain': 'local.knarly.com auth-server.herokuapp.com',
 			'client_id': process.env.YAHOO_ID,

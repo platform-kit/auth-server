@@ -1,9 +1,9 @@
 {
 	"name" : "Auth Server",
 	"description" : "OAuth1 and proxy server for shimming up thirdparty services via HelloJS",
-	"favicon" : "https://adodson.com/favicon.ico",
+	"favicon" : "avatar-w48.png",
 	"icons" : {
-		"64" : "https://adodson.com/favicon.ico"
+		"64" : "avatar-w64.png"
 	},
 	"twitter:creator" : "@setData",
 	"author" : "Andrew Dodson, https://adodson.com"

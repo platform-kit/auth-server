@@ -18,7 +18,7 @@
 					p.qs.force = 'true';
 				}
 			},
-			logout: function(p) {
+			logout: function() {
 				// return a path to follow
 				return base + 'auth/logout';
 			},

@@ -4,7 +4,7 @@
 var debug = require('debug')('auth/logout');
 
 // Export this module as middleware
-module.exports = function(req, res, next) {
+module.exports = function(req, res) {
 
 	// Removing session
 	req.session.destroy(() => {

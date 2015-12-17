@@ -24,13 +24,15 @@ const REDIRECT_URI = require('./credentials.js').redirect_uri;
 creds.forEach((cred) => {
 
 	// Pass some basic information back to the OAuthShim
-	cred.state = cred.state || {};
-	cred.state.redirect_uri = REDIRECT_URI;
-	cred.state.network = cred.name;
-	cred.state.client_id = cred.client_id;
+	cred.state = cred.name;
 
 	// Create url...
-	cred.url = cred.auth + '&client_id=' + cred.client_id + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) + '&response_type=code&state=' + encodeURIComponent(JSON.stringify(cred.state));
+	cred.url = cred.auth + '&' + qs.stringify({
+		client_id: cred.client_id,
+		redirect_uri: REDIRECT_URI,
+		response_type: 'code',
+		state: cred.state
+	});
 });
 
 
@@ -142,14 +144,14 @@ app.use((req, res, next) => {
 		// Unless the force=true in the query
 		if (authResponse && user && user.approved_apps.indexOf(clientId) >= 0 && req.query.force !== 'true') {
 			// Authenticated
-			debug("redirect re-authenticated", req.query.redirect_uri);
+			debug('redirect re-authenticated', req.query.redirect_uri);
 			res.redirect(req.query.redirect_uri + '?' + authResponse);
 			return;
 		}
 		// Refreshing the page with silent Authentication
 		else if (req.query.display === 'none') {
 			// Unauthenticated
-			debug("redirect un-authenticated", req.query.redirect_uri);
+			debug('redirect un-authenticated', req.query.redirect_uri);
 			res.redirect(req.query.redirect_uri + '?' + qs.stringify({error: 'unauthenticated', error_message: 'Unable to refresh the users session'}));
 			return;
 		}

@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
 	let message;
 
 	// Does the request query contain a valid access token?
-	if ("access_token" in req.query) {
+	if ('access_token' in req.query) {
 
 		var json = crypt.decrypt(req.query.access_token);
 
