@@ -103,9 +103,7 @@ app.use((req, res, next) => {
 			});
 		}
 	}, (err) => {
-		res.render('error', {
-			message: err.details
-		});
+		res.render('error', err);
 	});
 });
 

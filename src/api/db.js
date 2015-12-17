@@ -52,8 +52,10 @@ DB.query = function(sql, cond) {
 				debug(resp);
 				resolve(resp);
 			}, (err) => {
-				debug(err);
-				reject(err);
+				debug(err.message);
+				reject({
+					message: err.message
+				});
 			});
 		});
 	});

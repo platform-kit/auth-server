@@ -99,13 +99,11 @@ app.use('/:key/:table?', (req, res) => {
 		res.json(data);
 
 	}).then(null, (err) => {
+		// Requet error
+		err.code = "data_integrity";
+
 		// Push error response
-		res.json({
-			error: {
-				code: err.error,
-				message: err.details
-			}
-		});
+		res.json({error: err});
 	});
 });
 
@@ -164,8 +162,10 @@ function rest(table, method, query, body) {
 	}
 
 	return Promise.reject({
-		error: 'unsupported_method',
-		details: method.toUpperCase() + 'is an unsupported method'
+		error: {
+			code: 'unsupported_method',
+			message: method.toUpperCase() + 'is an unsupported method'
+		}
 	});
 }
 

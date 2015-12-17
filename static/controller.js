@@ -54,7 +54,7 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 			$scope.$apply();
 
 		}, function(err) {
-			ngNotify.set(err, 'error');
+			ngNotify.set(err.error.message, 'error');
 
 			// Apply
 			$scope.$apply();
@@ -74,7 +74,7 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 		.then(function() {
 			ngNotify.set('Successfully deleted record', 'success');
 		}, function(err) {
-			ngNotify.set(err.details, 'error');
+			ngNotify.set(err.error.message, 'error');
 		});
 	};
 
