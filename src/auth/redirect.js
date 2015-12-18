@@ -149,100 +149,100 @@ app.all('*',
 // auth-server maintains its own list of users
 function handleGrantedAuthorization(req, res, next) {
 
-	if (req.oauthshim && req.oauthshim.data && req.oauthshim.redirect) {
+	// Next: if this does not have oauthshim data...
+	if (!(req.oauthshim && req.oauthshim.data && req.oauthshim.redirect)) {
+		next();
+		return;
+	}
 
-		var data = req.oauthshim.data;
-		var opts = req.oauthshim.options;
+	// Reference
+	var data = req.oauthshim.data;
+	var opts = req.oauthshim.options;
 
-		// Was this an OAuth Login response and does it contain a new access_token?
-		if ('access_token' in data && !('path' in opts)) {
+	// Next: if this is not an OAuth Login response...
+	if (!('access_token' in data && !('path' in opts))) {
+		next();
+		return;
+	}
 
-			// What is the network name
-			var network = data.state;
+	// What is the network name
+	var network = data.state;
 
-			// Store this access_token
-			debug('Session created', network, data.access_token.substr(0, 8) + '...');
+	// Debug session created!
+	debug('Session created', network, data.access_token.substr(0, 8) + '...');
 
-			// Promisify the passport strategies
-			var chain = promisify(strategies[network].passport.userProfile).bind(strategies[network].passport)
+	// Promisify the passport strategies
+	var chain = promisify(strategies[network].passport.userProfile).bind(strategies[network].passport)
 
-			// Is this an OAuth1 requesst
-			var a = data.access_token.split(/[\:\@]/);
+	// Is this an OAuth1 requesst
+	var a = data.access_token.split(/[\:\@]/);
 
-			// Make request for a User Profile
-			if (a.length > 1) {
+	// Make request for a User Profile
+	if (a.length > 1) {
 
-				data.oauth_token = a[0];
-				data.oauth_token_secret = a[1];
+		data.oauth_token = a[0];
+		data.oauth_token_secret = a[1];
 
-				debug('OAuth1', data);
-				chain = chain(data.oauth_token, data.oauth_token_secret, data);
-			}
-			else {
-				chain = chain(data.access_token);
-			}
-
-			// Format profile response
-			chain.then((data) => {
-				//
-				debug(data);
-				// format the response
-				if (data) {
-					// custom formatter
-					if (AuthServices[network][3]) {
-						AuthServices[network][3](data);
-					}
-					// Generic formatter
-					formatPassportResponse(data);
-				}
-				return data;
-			})
-			// Handle the profile data
-			.then((profileData) => {
-
-				// Match the user with the profile data
-				return setProfileToSession(network, req.session.user_id, profileData)
-				.then((user_id) => {
-					debug('Session set user_id', user_id);
-					// Save this users data to the session
-					req.session.connections[network] = profileData;
-					req.session.user_id = user_id;
-
-				});
-			})
-			//
-			.then(() => {
-				// Continue back to the authorization page
-				next();
-			},
-			(err) => {
-
-				// Log error
-				debug(err);
-
-				// Initiate the properties which are passed to the rendered document
-				let options = {
-					session: req.session
-				};
-
-				// Duplicate?
-				if (err.message && err.message.match('duplicate')) {
-					// Error: the connection being linked is assigned to another account
-					options.message = 'Snap, this connection is linked to another account. \
-										It will have to be unlinked from the other account before it can be associated with this account';
-				}
-
-				// Display error page
-				res.render('error', options);
-			});
-		}
-		else {
-			next();
-		}
+		debug('OAuth1', data);
+		chain = chain(data.oauth_token, data.oauth_token_secret, data);
 	}
 	else {
-		next();
+		chain = chain(data.access_token);
 	}
+
+	// Format profile response
+	chain.then((data) => {
+		//
+		debug(data);
+		// format the response
+		if (data) {
+			// custom formatter
+			if (AuthServices[network][3]) {
+				AuthServices[network][3](data);
+			}
+			// Generic formatter
+			formatPassportResponse(data);
+		}
+		return data;
+	})
+	// Handle the profile data
+	.then((profileData) => {
+
+		// Match the user with the profile data
+		return setProfileToSession(network, req.session.user_id, profileData)
+		.then((user_id) => {
+			debug('Session set user_id', user_id);
+			// Save this users data to the session
+			req.session.connections[network] = profileData;
+			req.session.user_id = user_id;
+
+		});
+	})
+	//
+	.then(() => {
+		// Continue back to the authorization page
+		next();
+	},
+	(err) => {
+
+		// Log error
+		debug(err);
+
+		// Initiate the properties which are passed to the rendered document
+		let options = {
+			session: req.session
+		};
+
+		// Duplicate?
+		if (err.message && err.message.match('duplicate')) {
+			// Error: the connection being linked is assigned to another account
+			options.message = 'Snap, this connection is linked to another account. \
+								It will have to be unlinked from the other account before it can be associated with this account';
+		}
+
+		// Display error page
+		res.render('error', options);
+	});
 }
 
 function setProfileToSession(network, userId, profileData) {

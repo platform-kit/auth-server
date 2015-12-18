@@ -1,4 +1,4 @@
-/* global CLIENT_IDS, REDIRECT_URI, hello, angular */
+/* global hello, angular */
 var app = angular.module('app', ['ngNotify']);
 
 app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function($scope, $filter, $http, ngNotify) {
