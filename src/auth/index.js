@@ -13,7 +13,10 @@ app.use(require('serve-static')(__dirname + '/public'));
 
 // Session data
 app.use(require('express-session')({
-	secret: 'test',
+	cookie: {
+		path: '/auth/'
+	},
+	secret: 'auth-server-123',
 	resave: false,
 	saveUninitialized: true
 }));
