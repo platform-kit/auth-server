@@ -54,6 +54,11 @@ app.controller('controller', ['$scope', '$filter', '$http', 'ngNotify', function
 			$scope.$apply();
 
 		}, function(err) {
+
+			if (err.error.message.indexOf('unique constraint \"app_pkey\"') > -1) {
+				err.error.message = 'The client_id has already been set';
+			}
+
 			ngNotify.set(err.error.message, 'error');
 
 			// Apply
