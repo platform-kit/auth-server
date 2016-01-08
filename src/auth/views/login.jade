@@ -1,9 +1,26 @@
+mixin toolbar
+
+	div.adorn-toolbar
+
+		div.adorn-breadcrumbs
+
+		div.adorn-links
+			if user
+				a(href="./logout")= "Signout"
+
+
+			if query && query.redirect_uri
+				= " "
+				a(href=query.redirect_uri + "?error=cancelled&state=" + query.state)= "Cancel"
+
+			= " "
+
+			+continue
+
 mixin continue
-	if query && query.redirect_uri
-		a(href=query.redirect_uri + "?error=cancelled&state=" + query.state)= "Cancel"
-		=" "
-		if user
-			a(class="button green",href="?" + auth_response + "&redirect_uri=" + query.redirect_uri)= "Continue..."
+	if query && query.redirect_uri && user
+		a(class="button green",href="?" + auth_response + "&redirect_uri=" + query.redirect_uri)= "Continue"
+
 
 doctype html
 html
@@ -17,9 +34,9 @@ html
 
 	body
 
-		include head
+		+toolbar
 
-		+continue
+		include head
 
 		h2= "Connections"
 		div.connections
