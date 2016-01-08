@@ -8,7 +8,8 @@
 	"main": "server.js",
 	"scripts": {
 		"start": "node server.js",
-		"dev": "DEBUG=80 nodemon server-dev.js",
+		"dev": "PORT=80 nodemon server-dev.js",
+		"pngify": "svg2png ./avatar.svg -w 48",
 		"heroku_db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
 		"local_db": "PGUSER=postgres PGPASSWORD=root psql auth-server",
 		"local_drop_db": "PGUSER=postgres PGPASSWORD=root dropdb auth-server",
