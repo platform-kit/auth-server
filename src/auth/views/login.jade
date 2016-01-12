@@ -53,7 +53,7 @@ html
 				else
 					div(class=cred.name)
 						a.button(href=cred.url, class="zocial " + cred.name)
-							= "Connect via " + cred.name
+							= "Connect via " + cred.name.replace(/^[a-z]/, (m) => {return m.toUpperCase();})
 
 		if user
 			h2="Continue"
