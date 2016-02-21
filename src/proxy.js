@@ -23,6 +23,10 @@ app.use((req, res, next) => {
 		var data = req.oauthshim.data;
 
 		if ('error' in data) {
+
+			// Debug
+			debug(data.error);
+
 			// Change the default messages in the response
 			switch (data.error) {
 				case 'consumer_key_unknown':
@@ -65,19 +69,19 @@ app.use((req, res, next) => {
 
 				db('apps')
 				.get(['grant_url'], {client_id: id})
-				.then((row) => {
+				.then(row => {
 					if (!row.grant_url) {
 						// Update DB
 						db('apps')
 						.update({grant_url: (opts.oauth.grant || opts.oauth.token)}, {client_id: id})
-						.then((res) => {
+						.then(res => {
 							debug(res);
-						}, (err) => {
+						}, err => {
 							debug(err);
 						});
 					}
 				})
-				.then(null, (err) => {
+				.then(null, err => {
 					debug(err);
 				});
 			}
@@ -101,6 +105,9 @@ app.use(oauthshim.unhandled);
 // Return the secret from a database
 oauthshim.credentials.get = (query, callback) => {
 
+	// Get credentials
+	debug(query);
+
 	// No Credentials?
 	// Retrun NULL, and accept default handling
 	if (!query) {
@@ -114,7 +121,7 @@ oauthshim.credentials.get = (query, callback) => {
 	//
 	db('apps')
 	.get(['domain', 'client_id', 'client_secret', 'grant_url'], {client_id: query.client_id})
-	.then((row) => {
+	.then(row => {
 		// Callback
 		// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
 		callback(row || null);

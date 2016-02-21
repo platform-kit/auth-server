@@ -22,6 +22,7 @@ INSERT INTO client_apps (client_id, client_secret, redirect_uri, name, user_id) 
 
 CREATE TABLE users (
 	id SERIAL NOT NULL PRIMARY KEY,
+	created TIMESTAMP DEFAULT NOW(),
 
 	-- Basic
 	name VARCHAR,
@@ -72,15 +73,15 @@ ALTER TABLE apps ADD COLUMN id SERIAL;
 
 
 
-
-
-
 -- ALTER TABLE apps
 -- ADD COLUMN facebook_id VARCHAR,
 -- ADD COLUMN google_id VARCHAR,
 -- ADD COLUMN windows_id VARCHAR,
 -- ADD COLUMN yahoo_id VARCHAR
 -- ;
+
+-- ALTER TABLE apps ADD COLUMN created TIMESTAMP DEFAULT NOW();
+-- ALTER TABLE users ADD COLUMN created TIMESTAMP DEFAULT NOW();
 
 -- UPDATE apps SET
 -- 	facebook_id = REGEXP_REPLACE(substring(admin_id from '[^@\s,]+\@facebook'), '\@(google|facebook|windows|yahoo)', ''),

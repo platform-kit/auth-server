@@ -21,7 +21,7 @@ var creds = require('./credentials.js').credentials;
 const REDIRECT_URI = require('./credentials.js').redirect_uri;
 
 // Build URL's for the credentials
-creds.forEach((cred) => {
+creds.forEach(cred => {
 
 	// Pass some basic information back to the OAuthShim
 	cred.state = cred.name;
@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 			// Get the users approved app list to add to it...
 			db('users')
 			.get(['approved_apps'], {id: json.user_id})
-			.then((data) => {
+			.then(data => {
 				if (data.approved_apps.split(',').indexOf(json.client_id) === -1) {
 					data.approved_apps += ',' + json.client_id;
 					return db('users').update(data, {id: json.user_id});
@@ -90,7 +90,7 @@ app.use((req, res, next) => {
 	// Query the database for the redirect_uri which matches this database.
 	db('client_apps')
 	.get(['client_id, redirect_uri'], {client_id: req.query.client_id})
-	.then((data) => {
+	.then(data => {
 
 		// Test that the redirect_uri exists within the response
 		if (match_redirect(data.redirect_uri, req.query.redirect_uri)) {
@@ -102,7 +102,7 @@ app.use((req, res, next) => {
 				message: 'The redirect_uri does not match that on record.'
 			});
 		}
-	}, (err) => {
+	}, err => {
 		res.render('error', err);
 	});
 });
@@ -127,7 +127,7 @@ app.use((req, res, next) => {
 	}
 
 	// Send back to the system
-	chain.then((user) => {
+	chain.then(user => {
 
 		debug('Render login page for', userId);
 
@@ -161,7 +161,7 @@ app.use((req, res, next) => {
 			query: req.query,
 			auth_response: authResponse
 		});
-	}).then(null, (err) => {
+	}).then(null, err => {
 
 		debug(err);
 		next();
@@ -180,7 +180,7 @@ function getUser(userId) {
 
 	return db('users')
 	.get(['*'], {id: userId})
-	.then((user) => {
+	.then(user => {
 
 		debug('Acquired user data');
 

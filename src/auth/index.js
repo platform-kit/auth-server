@@ -21,7 +21,7 @@ app.use(require('express-session')({
 	saveUninitialized: true
 }));
 
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
 	if (!req.session) {
 		req.session = {};
 	}

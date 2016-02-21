@@ -4,24 +4,53 @@ body {
 img {
   border-radius: 50%;
   vertical-align: middle;
+  object-fit: cover;
 }
 .connections {
+  line-height: 1;
   width: 350px;
   margin: auto;
 }
-.connections p {
+.connections li {
+  padding: 20px;
+  list-style: none;
+  position: relative;
   text-align: left;
   white-space: nowrap;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+}
+.connections li > div {
+  margin: 0 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.connections li > div > .what {
+  font-weight: bold;
+}
+.connections img {
+  width: 24px;
+  height: 24px;
+  margin: 0 0.5em;
 }
 .zocial {
   background-image: none;
-  width: 250px;
-  font: inherit !important;
+  width: 100%;
   background-image: none !important;
   font-weight: bold !important;
+  font-size: 1.2em !important;
 }
 .zocial.icon {
   vertical-align: middle;
+  border-radius: 50%;
+  line-height: 2.4em !important;
+  height: 2.4em;
+  width: 2.4em;
+  max-height: none;
+}
+.zocial.icon:before {
+  line-height: 2em;
 }
 .profile {
   margin-top: 5em;
@@ -31,7 +60,4 @@ img {
   width: 100px;
   height: 100px;
   background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxnPgogIDxjaXJjbGUgcj0iMzAiIGN5PSIzMCIgY3g9IjUwIiBzdHJva2Utd2lkdGg9IjAiIGZpbGw9IiNiN2I3YjciLz4KICA8Y2lyY2xlIHI9IjQ1IiBjeT0iMTAwIiBjeD0iNTAiIHN0cm9rZS13aWR0aD0iMCIgZmlsbD0iI2I3YjdiNyIvPgogPC9nPgo8L3N2Zz4K");
-}
-.connections img {
-  margin: 0 0.5em;
 }

@@ -39,21 +39,27 @@ html
 		include head
 
 		h2= "Connections"
-		div.connections
-			for cred in credentials
-				if user && user.connections && user.connections[cred.name]
-					- var profile = user.connections[cred.name];
-					p
-						span(class="icon zocial " + cred.name)
-						= " logged in as "
-						if profile.picture
-							img(src=profile.picture, width=50)
-						b
-							= profile.displayName
-				else
-					div(class=cred.name)
-						a.button(href=cred.url, class="zocial " + cred.name)
-							= "Connect via " + cred.name.replace(/^[a-z]/, (m) => {return m.toUpperCase();})
+		section
+			ul.connections
+				for cred in credentials
+					li(class="connection " + cred.name)
+						a.button(href=cred.url, class="zocial icon " + cred.name)
+						div
+							- var profile = user && user.connections ? user.connections[cred.name] : null;
+
+							div.what
+								= cred.name.replace(/^[a-z]/, m => {return m.toUpperCase();})
+
+							if profile
+								div.who
+									= profile.displayName
+									if profile.picture
+										img(src=profile.picture)
+
+							div
+								a(href=cred.url)
+									= profile ? "Reconnect" : "Connect"
+
 
 		if user
 			h2="Continue"

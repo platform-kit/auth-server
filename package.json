@@ -1,41 +1,42 @@
 {
-	"name": "auth-server",
-	"version": "1.0.1",
-	"engines": {
-		"node": "5.x"
-	},
-	"node": "0.10.33",
-	"main": "server.js",
-	"scripts": {
-		"start": "node server.js",
-		"dev": "PORT=80 nodemon server-dev.js",
-		"pngify": "svg2png ./avatar.svg -w 48",
-		"heroku_db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
-		"local_db": "PGUSER=postgres PGPASSWORD=root psql auth-server",
-		"local_drop_db": "PGUSER=postgres PGPASSWORD=root dropdb auth-server",
-		"heroku_export_db": "PGUSER=postgres PGPASSWORD=root heroku pg:pull HEROKU_POSTGRESQL_BLUE_URL auth-server --app auth-server",
-		"export_db_manual": "pg_dump --verbose -C -O -f db.dump -F c -Z 0 `heroku config:get HEROKU_POSTGRESQL_BLUE_URL`",
-		"import_db_manual": "PGUSER=postgres PGPASSWORD=root pg_restore --verbose --clean --no-acl --no-owner -h localhost -U postgres -d auth-server db.dump"
-	},
-	"dependencies": {
-		"body-parser": "^1.14.1",
-		"debug": "^2.2.0",
-		"dotenv": "^1.2.0",
-		"express": "^4.13.3",
-		"express-session": "^1.12.1",
-		"jade": "^1.11.0",
-		"newrelic": "*",
-		"passport-facebook": "^2.0.0",
-		"passport-github": "^1.0.0",
-		"passport-google-oauth": "^0.2.0",
-		"passport-twitter": "^1.0.3",
-		"passport-windowslive": "^1.0.1",
-		"passport-yahoo-oauth": "MrSwitch/passport-yahoo-oauth",
-		"pg": "^4.4.3",
-		"promisify-node": "^0.3.0",
-		"serve-static": "^1.9.1"
-	},
-	"devDependencies": {
-		"pre-commit": "^1.1.2"
-	}
+  "name": "auth-server",
+  "version": "1.0.1",
+  "engines": {
+    "node": "5.x"
+  },
+  "node": "0.10.33",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "PORT=80 nodemon server-dev.js",
+    "pngify": "svg2png ./avatar.svg -w 48",
+    "heroku_db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
+    "local_db": "PGUSER=postgres PGPASSWORD=root psql auth-server",
+    "local_drop_db": "PGUSER=postgres PGPASSWORD=root dropdb auth-server",
+    "heroku_export_db": "PGUSER=postgres PGPASSWORD=root heroku pg:pull HEROKU_POSTGRESQL_BLUE_URL auth-server --app auth-server",
+    "export_db_manual": "pg_dump --verbose -C -O -f db.dump -F c -Z 0 `heroku config:get HEROKU_POSTGRESQL_BLUE_URL`",
+    "import_db_manual": "PGUSER=postgres PGPASSWORD=root pg_restore --verbose --clean --no-acl --no-owner -h localhost -U postgres -d auth-server db.dump"
+  },
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "css-social-buttons": "github:mrswitch/css-social-buttons",
+    "debug": "^2.2.0",
+    "dotenv": "^1.2.0",
+    "express": "^4.13.3",
+    "express-session": "^1.12.1",
+    "jade": "^1.11.0",
+    "newrelic": "*",
+    "passport-facebook": "^2.0.0",
+    "passport-github": "^1.0.0",
+    "passport-google-oauth": "^0.2.0",
+    "passport-twitter": "^1.0.3",
+    "passport-windowslive": "^1.0.1",
+    "passport-yahoo-oauth": "MrSwitch/passport-yahoo-oauth",
+    "pg": "^4.4.3",
+    "promisify-node": "^0.3.0",
+    "serve-static": "^1.9.1"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.1.2"
+  }
 }

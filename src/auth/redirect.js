@@ -17,8 +17,8 @@ app.set('views', __dirname + '/views');
 
 // Get the Services which we're going to identify with
 var AuthServices = {
-	facebook: [2, require('passport-facebook').Strategy, {profileFields: 'id,displayName,email'.split(',')}, (data) => {if (data.id) {data.picture = 'https://graph.facebook.com/' + data.id + '/picture';}}],
-	github: [2, require('passport-github').Strategy, {}, (data) => {data.picture = data._json.avatar_url;}],
+	facebook: [2, require('passport-facebook').Strategy, {profileFields: 'id,displayName,email'.split(',')}, data => {if (data.id) {data.picture = 'https://graph.facebook.com/' + data.id + '/picture';}}],
+	github: [2, require('passport-github').Strategy, {}, data => {data.picture = data._json.avatar_url;}],
 	google: [2, require('passport-google-oauth').OAuth2Strategy],
 	// linkedin: [1, require('passport-linkedin').Strategy, {}],
 	twitter: [1, require('passport-twitter').Strategy],
@@ -37,7 +37,7 @@ const REDIRECT_URI = require('./credentials.js').redirect_uri;
 // Passport Profile
 // Configure PassportJS's Google service
 var strategies = {};
-creds.forEach((cred) => {
+creds.forEach(cred => {
 
 	var network = cred.name;
 	strategies[network] = cred;
@@ -191,7 +191,7 @@ function handleGrantedAuthorization(req, res, next) {
 	}
 
 	// Format profile response
-	chain.then((data) => {
+	chain.then(data => {
 		//
 		debug(data);
 		// format the response
@@ -206,7 +206,7 @@ function handleGrantedAuthorization(req, res, next) {
 		return data;
 	})
 	// Handle the profile data
-	.then((profileData) => {
+	.then(profileData => {
 
 		// Match the user with the profile data
 		return setProfileToSession(network, req.session.user_id, profileData)
@@ -223,7 +223,7 @@ function handleGrantedAuthorization(req, res, next) {
 		// Continue back to the authorization page
 		next();
 	},
-	(err) => {
+	err => {
 
 		// Log error
 		debug(err);
@@ -253,15 +253,13 @@ function setProfileToSession(network, userId, profileData) {
 	// If the current user is signed in...
 	if (userId) {
 		// Update the current users connection
-		return getUserById(userId).then((userData) => {
-			return updateUserConnection(network, userData, profileData);
-		});
+		return getUserById(userId).then(userData => updateUserConnection(network, userData, profileData));
 	}
 
 	// The user has not be defined.
 	// Retrieve the the user whom has this connection
 	return getUserByConnectionId(network, profileData.id)
-	.then((userData) => {
+	.then(userData => {
 
 		// Get userID
 		let userId = userData ? userData.id : undefined;
@@ -276,7 +274,7 @@ function setProfileToSession(network, userId, profileData) {
 			return updateUserConnection(network, userData, profileData);
 		}
 
-	}).then((userId) => {
+	}).then(userId => {
 		debug('Acquired User', userId);
 		return userId;
 	});
@@ -291,9 +289,7 @@ function getUserById(userId) {
 function getUserByConnectionId(network, conn_id) {
 
 	return db.query('SELECT * FROM users WHERE ' + network + '_id LIKE \'%' + conn_id + '%\' LIMIT 1')
-	.then((data) => {
-		return data.rows.length ? data.rows[0] : undefined;
-	});
+	.then(data => data.rows.length ? data.rows[0] : undefined);
 }
 
 function createUserFromConnection(network, profileData) {
@@ -309,7 +305,7 @@ function createUserFromConnection(network, profileData) {
 
 	return db('users')
 	.insert(post)
-	.then((data) => {
+	.then(data => {
 		// Found the user, associate this session with them
 		return data.id;
 	});

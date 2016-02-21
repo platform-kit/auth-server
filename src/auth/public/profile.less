@@ -7,42 +7,69 @@ body {
 img {
 	border-radius: 50%;
 	vertical-align: middle;
+	object-fit:cover;
 }
 
 .connections {
+	line-height: 1;
 	width: 350px;
 	margin: auto;
 
-	p {
+	li {
+		padding:20px;
+		list-style: none;
+		position: relative;
 		text-align: left;
 		white-space: nowrap;
+		border-bottom: 1px solid #ccc;
+		display: flex;
+		> div {
+			margin:0 20px;
+			flex:1;
+			display: flex;
+			flex-direction:column;
+
+			> .what {
+				font-weight: bold;
+			}
+		}
+	}
+
+	img {
+		width: 24px;
+		height: 24px;
+		margin: 0 0.5em;
 	}
 }
 
+
 .zocial {
 	background-image: none;
-	width: 250px;
-	font: inherit !important;
+	width: 100%;
 	background-image: none !important;
 	font-weight: bold !important;
-}
+	font-size: 1.2em !important;
 
-.zocial.icon {
-	vertical-align: middle;
+	&.icon {
+		vertical-align: middle;
+		border-radius: 50%;
+		line-height: 2.4em !important;
+		height: 2.4em;
+		width: 2.4em;
+		max-height: none;
+		&:before{
+		    line-height: 2em;
+		}
+	}
 }
 
 .profile {
 	margin-top:5em;
 	margin-bottom:2em;
+
 	img {
 		width:100px;
 		height:100px;
 		background: data-uri('avatar.svg');
-	}
-}
-
-.connections {
-	img {
-		margin: 0 0.5em;
 	}
 }

@@ -10,10 +10,10 @@ module.exports = (req, res) => {
 	// Make an arbitary call...
 	db('apps')
 	.get(['COUNT(*) AS count'])
-	.then((row) => {
+	.then(row => {
 		res.end('Status: ok', 'utf-8');
 		debug('rows', row.count);
-	}, (err) => {
+	}, err => {
 		res.writeHead(503);
 		res.end('Status: failing', 'utf-8');
 		debug(err);

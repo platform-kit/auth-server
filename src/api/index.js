@@ -83,7 +83,7 @@ app.use('/:key/:table?', (req, res) => {
 
 	// Make DB call
 	rest(table, method, query, body)
-	.then((data) => {
+	.then(data => {
 
 		debug('got data');
 		// CORS
@@ -98,7 +98,7 @@ app.use('/:key/:table?', (req, res) => {
 		// Push body of response
 		res.json(data);
 
-	}).then(null, (err) => {
+	}).then(null, err => {
 		// Request error
 		err.code = 'data_integrity';
 
@@ -124,7 +124,7 @@ function rest(table, method, query, body) {
 
 		return db(table)
 		.getAll(fields, cond, opts)
-		.then((data) => {
+		.then(data => {
 			// Is this a request for a single item
 			return query.id && data.rows ? data.rows[0] : {data: data.rows};
 		});

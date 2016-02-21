@@ -12,7 +12,7 @@ var client = new Promise((resolve, reject) => {
 
 	// Set the client
 	let agent = new pg.Client(conn);
-	agent.connect((err) => {
+	agent.connect(err => {
 
 		// Connected to DB?
 		if (err) {
@@ -42,7 +42,7 @@ DB.use = function(table) {
 // Run the query
 DB.query = function(sql, values) {
 
-	return client.then((agent) => {
+	return client.then(agent => {
 		// Run the query
 		return new Promise((resolve, reject) => {
 			agent.query(sql, values, (err, resp) => {
@@ -66,7 +66,7 @@ DB.query = function(sql, values) {
 // Get
 DB.get = function(fields, cond) {
 	return this.getAll(fields, cond, {limit: 1})
-	.then((data) => {
+	.then(data => {
 		if (data && data.rows && data.rows.length) {
 			return data.rows[0];
 		}
@@ -126,7 +126,7 @@ DB.update = function(data, cond) {
 		values.push(cond[x]);
 	}
 	return this.query('UPDATE ' + this.table + ' SET ' + set.join(',') + ' WHERE ' + where.join(' AND '), values)
-	.then((resp) => {
+	.then(resp => {
 		if (resp.rowCount) {
 			resp.success = true;
 		}
