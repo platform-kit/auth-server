@@ -12,33 +12,38 @@ pg.on('error', err => {
 	console.log(err);
 });
 
+// Client
+let client = connect();
 
 // Start a new connection to the database
-var client = new Promise((resolve, reject) => {
+function connect() {
+	return new Promise((resolve, reject) => {
 
-	// Set the client
-	let agent = new pg.Client(conn);
-	agent.connect(err => {
+		// Set the client
+		let agent = new pg.Client(conn);
+		agent.connect(err => {
 
-		// Connected to DB?
-		if (err) {
-			debug('Failed to connected to POSTGRESQL ' + conn, err);
-			reject({message: 'Failed to connect to DB'});
-			return;
-		}
+			// Connected to DB?
+			if (err) {
+				debug('Failed to connected to POSTGRESQL ' + conn, err);
+				reject({message: 'Failed to connect to DB'});
+				return;
+			}
 
-		// Connected
-		debug('Connected to POSTGRESQL ' + conn);
+			// Connected
+			debug('Connected to POSTGRESQL ' + conn);
 
-		// Resolve connection
-		resolve(agent);
+			// Resolve connection
+			resolve(agent);
+		});
+
+		agent.on('error', err => {
+			console.log('Connection errored');
+			console.log(err);
+			client = connect();
+		});
 	});
-
-	agent.on('error', err => {
-		console.log('Connection errored');
-		console.log(err);
-	});
-});
+}
 
 function DB(table) {
 	return DB.use(table);
