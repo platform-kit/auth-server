@@ -7,6 +7,12 @@ var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL || 'tcp://postgres:root@localh
 // Export the function DB
 module.exports = DB;
 
+pg.on('error', err => {
+	console.log('pg Connection errored');
+	console.log(err);
+});
+
+
 // Start a new connection to the database
 var client = new Promise((resolve, reject) => {
 
@@ -28,7 +34,7 @@ var client = new Promise((resolve, reject) => {
 		resolve(agent);
 	});
 
-	agent.connection.on('error', err => {
+	agent.on('error', err => {
 		console.log('Connection errored');
 		console.log(err);
 	});
