@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "PORT=80 nodemon server-dev.js",
+    "mocha": "mocha --reporter spec test/specs/*.js",
     "pngify": "svg2png ./avatar.svg -w 48",
     "heroku_db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
     "local_db": "PGUSER=postgres PGPASSWORD=root psql auth-server",
@@ -32,11 +33,12 @@
     "passport-twitter": "^1.0.3",
     "passport-windowslive": "^1.0.1",
     "passport-yahoo-oauth": "MrSwitch/passport-yahoo-oauth",
-    "pg": "^4.4.3",
+    "pg": "^4.5.1",
     "promisify-node": "^0.3.0",
     "serve-static": "^1.9.1"
   },
   "devDependencies": {
+    "mocha": "^2.4.5",
     "pre-commit": "^1.1.2"
   }
 }
