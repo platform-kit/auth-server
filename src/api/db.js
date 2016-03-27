@@ -27,6 +27,11 @@ var client = new Promise((resolve, reject) => {
 		// Resolve connection
 		resolve(agent);
 	});
+
+	agent.connection.on('error', err => {
+		console.log('Connection errored');
+		console.log(err);
+	});
 });
 
 function DB(table) {
