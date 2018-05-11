@@ -119,12 +119,19 @@ oauthshim.credentials.get = (query, callback) => {
 	// Search the database
 	// Get all the current stored credentials
 	//
+	var cond = {client_id: query.client_id};
+
 	db('apps')
-	.get(['domain', 'client_id', 'client_secret', 'grant_url'], {client_id: query.client_id})
+	.get(['domain', 'client_id', 'client_secret', 'grant_url'], cond)
 	.then(row => {
 		// Callback
 		// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
 		callback(row || null);
+
+		// Update the db last accessed
+		db('apps').update({
+			last_accessed: 'CURRENT_TIMESTAMP'
+		}, cond)
 	}, () => {
 		callback(null);
 	});

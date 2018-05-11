@@ -134,8 +134,12 @@ DB.update = function(data, cond) {
 		i = 1;
 
 	for (let x in data) {
-		set.push(x + ' = $' + i++);
-		values.push(data[x]);
+		var val = data[x];
+		if (val !== 'CURRENT_TIMESTAMP') {
+			values.push(val);
+			val = '$' + i++;
+		}
+		set.push(x + ' = ' + val);
 	}
 	for (let x in cond) {
 		where.push(x + ' = $' + i++);
