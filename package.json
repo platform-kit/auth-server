@@ -8,7 +8,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "PORT=80 nodemon server-dev.js",
+    "dev": "nodemon server-dev.js",
     "mocha": "mocha --reporter spec test/specs/*.js",
     "pngify": "svg2png ./avatar.svg -w 48",
     "heroku_db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "mocha": "^2.4.5",
+    "nodemon": "^1.9.1",
     "pre-commit": "^1.1.2"
   }
 }
