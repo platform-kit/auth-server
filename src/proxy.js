@@ -122,7 +122,7 @@ oauthshim.credentials.get = (query, callback) => {
 	var cond = {client_id: query.client_id};
 
 	db('apps')
-	.get(['domain', 'client_id', 'client_secret', 'grant_url'], cond)
+	.get(['domain', 'client_id', 'client_secret', 'grant_url', 'count_accessed'], cond)
 	.then(row => {
 		// Callback
 		// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
@@ -130,7 +130,8 @@ oauthshim.credentials.get = (query, callback) => {
 
 		// Update the db last accessed
 		db('apps').update({
-			last_accessed: 'CURRENT_TIMESTAMP'
+			last_accessed: 'CURRENT_TIMESTAMP',
+			count_accessed: (row.count_accessed + 1)
 		}, cond)
 	}, () => {
 		callback(null);
