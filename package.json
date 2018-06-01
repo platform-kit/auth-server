@@ -9,7 +9,6 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon --exec 'node -r dotenv/config' server.js",
-    "mocha": "mocha --reporter spec test/specs/*.js",
     "pngify": "svg2png ./avatar.svg -w 48",
     "heroku_db": "heroku pg:psql HEROKU_POSTGRESQL_BLUE_URL",
     "local_db": "PGUSER=postgres PGPASSWORD=root psql auth-server",
@@ -27,6 +26,7 @@
     "express-session": "^1.12.1",
     "jade": "^1.11.0",
     "newrelic": "*",
+    "oauth-shim": "^1.1.1",
     "passport-facebook": "^2.0.0",
     "passport-github": "^1.0.0",
     "passport-google-oauth": "^0.2.0",
@@ -38,7 +38,6 @@
     "serve-static": "^1.9.1"
   },
   "devDependencies": {
-    "mocha": "^2.4.5",
     "nodemon": "^1.9.1",
     "pre-commit": "^1.1.2"
   }

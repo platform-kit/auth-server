@@ -6,7 +6,7 @@ var debug = require('debug')('redirect');
 
 var promisify = require('promisify-node');
 var db = require('../api/db');
-var oauthshim = require('../../lib/oauth-shim');
+var oauthshim = require('oauth-shim');
 
 // Export this module as middleware
 var app = module.exports = require('express')();

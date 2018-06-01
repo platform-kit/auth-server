@@ -1,7 +1,7 @@
 'use strict';
 var debug = require('debug')('proxy');
 
-var oauthshim = require('../lib/oauth-shim');
+var oauthshim = require('oauth-shim');
 var db = require('./api/db');
 
 // Export this module as middleware
