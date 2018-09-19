@@ -2,7 +2,7 @@
 (function(hello) {
 
 	// Setup a link with the current
-	const base = `//${ window.location.hostname }/`;
+	const base = `//${ window.location.host }/`;
 
 	hello.init({
 		authserver: {
