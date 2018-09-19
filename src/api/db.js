@@ -2,7 +2,7 @@
 
 var debug = require('debug')('db');
 var pg = require('pg');
-var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL || process.env.DATABASE_URL;
+var conn = process.env.HEROKU_POSTGRESQL_BLUE_URL || 'tcp://postgres:root@localhost/auth-server';
 
 // Export the function DB
 module.exports = DB;
@@ -13,17 +13,11 @@ pg.on('error', err => {
 });
 
 // Client
-let _connection;
+let client = connect();
 
 // Start a new connection to the database
-function client() {
-
+function connect() {
 	return new Promise((resolve, reject) => {
-
-		if (_connection) {
-			resolve(_connection);
-			return;
-		}
 
 		// Set the client
 		let agent = new pg.Client(conn);
@@ -36,9 +30,6 @@ function client() {
 				return;
 			}
 
-			// Save the connection
-			_connection = agent;
-
 			// Connected
 			debug('Connected to POSTGRESQL ' + conn);
 
@@ -49,7 +40,7 @@ function client() {
 		agent.on('error', err => {
 			console.log('Connection errored');
 			console.log(err);
-			_connection = null;
+			client = connect();
 		});
 	});
 }
@@ -67,7 +58,7 @@ DB.use = function(table) {
 // Run the query
 DB.query = function(sql, values) {
 
-	return client().then(agent => {
+	return client.then(agent => {
 		// Run the query
 		return new Promise((resolve, reject) => {
 			agent.query(sql, values, (err, resp) => {
