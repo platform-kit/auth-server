@@ -36,6 +36,9 @@ function client() {
 				return;
 			}
 
+			// Save the connection
+			_connection = agent;
+
 			// Connected
 			debug('Connected to POSTGRESQL ' + conn);
 
