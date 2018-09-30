@@ -5,6 +5,11 @@ Add your application **client id**'s and **client secrets** below to use this pr
 
 
 
+# Start the application locally
 
+- Requires Docker
+- See the setup guide to creating a local instance of the database [docker/README.md](docker/README.md)
 
-
+```shell
+docker-compose up
+```

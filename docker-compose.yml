@@ -3,7 +3,7 @@ services:
   web:
     build: .
     ports:
-      - "80:80"
+      - "5500:80"
     env_file: .env
     environment:
       - DATABASE_URL=postgres://postgres:password@db:5432/auth-server
