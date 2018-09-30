@@ -12,7 +12,7 @@ var oauthshim = require('oauth-shim');
 var app = module.exports = require('express')();
 
 // Jade
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 app.set('views', __dirname + '/views');
 
 // Get the Services which we're going to identify with

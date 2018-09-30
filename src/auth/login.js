@@ -12,7 +12,7 @@ var crypt = require('./lib/crypt');
 var app = module.exports = require('express')();
 
 // Jade
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 app.set('views', __dirname + '/views');
 
 // OAuth-Shim

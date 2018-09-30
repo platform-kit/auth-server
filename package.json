@@ -18,27 +18,27 @@
     "import_db_manual": "PGUSER=postgres PGPASSWORD=root pg_restore --verbose --clean --no-acl --no-owner -h localhost -U postgres -d auth-server db.sql"
   },
   "dependencies": {
-    "body-parser": "^1.14.1",
+    "body-parser": "^1.18.3",
     "css-social-buttons": "github:mrswitch/css-social-buttons",
-    "debug": "^2.2.0",
+    "debug": "^2.6.9",
     "dotenv": "^1.2.0",
-    "express": "^4.13.3",
-    "express-session": "^1.12.1",
-    "jade": "^1.11.0",
-    "newrelic": "*",
-    "oauth-shim": "^1.1.1",
-    "passport-facebook": "^2.0.0",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "newrelic": "^4.8.1",
+    "oauth-shim": "^1.1.3",
+    "passport-facebook": "^2.1.1",
     "passport-github": "^1.0.0",
     "passport-google-oauth": "^0.2.0",
     "passport-twitter": "^1.0.3",
     "passport-windowslive": "^1.0.1",
-    "passport-yahoo-oauth": "MrSwitch/passport-yahoo-oauth",
-    "pg": "^4.5.1",
+    "passport-yahoo-oauth": "github:MrSwitch/passport-yahoo-oauth",
+    "pg": "^4.5.7",
     "promisify-node": "^0.3.0",
-    "serve-static": "^1.9.1"
+    "pug": "^2.0.3",
+    "serve-static": "^1.13.2"
   },
   "devDependencies": {
-    "nodemon": "^1.9.1",
-    "pre-commit": "^1.1.2"
+    "nodemon": "^1.18.4",
+    "pre-commit": "^1.2.2"
   }
 }
