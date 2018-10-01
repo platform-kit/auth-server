@@ -128,12 +128,20 @@ oauthshim.credentials.get = (query, callback) => {
 		// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
 		callback(row || null);
 
-		// Update the db last accessed
-		db('apps').update({
-			last_accessed: 'CURRENT_TIMESTAMP',
-			count_accessed: (row.count_accessed + 1)
-		}, cond)
-	}, () => {
+		// Update the count_accessed
+		if (row && 'count_accessed' in row) {
+			// Update the db last accessed
+			db('apps')
+			.update({
+				last_accessed: 'CURRENT_TIMESTAMP',
+				count_accessed: (row.count_accessed + 1)
+			}, cond)
+			.catch(err => {
+				console.error('failed to update the count_accessed field', err, cond);
+			});
+		}
+	})
+	.catch(() => {
 		callback(null);
 	});
 };
