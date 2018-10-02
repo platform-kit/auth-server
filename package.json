@@ -48,12 +48,6 @@
     "pre-commit": "^1.2.2"
   },
   "pre-commit": [
-    "test"
-  ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm test",
-      "pre-push": "npm test"
-    }
-  }
+    "lint"
+  ]
 }
