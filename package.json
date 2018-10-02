@@ -47,7 +47,7 @@
     "nodemon": "^1.18.4",
     "pre-commit": "^1.2.2"
   },
-  "precommit.silent": true,
+  "precommit.silent": false,
   "pre-commit": [
     "lint"
   ]
