@@ -26,7 +26,7 @@ function connect() {
 			// Connected to DB?
 			if (err) {
 				debug(`Failed to connected to POSTGRESQL ${ conn}`, err);
-				reject({message: 'Failed to connect to DB'});
+				reject(new Error('Failed to connect to DB'));
 				return;
 			}
 
@@ -56,38 +56,34 @@ DB.use = function(table) {
 };
 
 // Run the query
-DB.query = function(sql, values) {
+DB.query = async function(sql, values) {
 
-	return client.then(agent => {
-		// Run the query
-		return new Promise((resolve, reject) => {
-			agent.query(sql, values, (err, resp) => {
+	const agent = await client;
 
-				if (err) {
-					debug(err.message);
-					reject({
-						message: err.message
-					});
-				}
-				else {
-					debug(resp);
-					resolve(resp);
-				}
-			});
+	// Run the query
+	return new Promise((resolve, reject) => {
+		agent.query(sql, values, (err, resp) => {
+
+			if (err) {
+				debug(err.message);
+				reject(err);
+			}
+			else {
+				debug(resp);
+				resolve(resp);
+			}
 		});
 	});
 
 };
 
 // Get
-DB.get = function(fields, cond) {
-	return this.getAll(fields, cond, {limit: 1})
-		.then(data => {
-			if (data && data.rows && data.rows.length) {
-				return data.rows[0];
-			}
-			return null;
-		});
+DB.get = async function(fields, cond) {
+	const data = await this.getAll(fields, cond, {limit: 1});
+	if (data && data.rows && data.rows.length) {
+		return data.rows[0];
+	}
+	return null;
 };
 
 DB.getAll = function(fields, cond, options) {
@@ -110,7 +106,7 @@ DB.getAll = function(fields, cond, options) {
 };
 
 // Insert
-DB.insert = function(data) {
+DB.insert = async function(data) {
 
 	const keys = [];
 
@@ -128,17 +124,16 @@ DB.insert = function(data) {
 		temp.push(`$${ i++}`);
 		values.push(data[x]);
 	}
-	return this.query(`INSERT INTO ${ this.table }(${ keys.join(',') }) VALUES( ${ temp.join(',') } ) RETURNING *`, values)
-		.then(formatResponse);
+	const resp = await this.query(`INSERT INTO ${ this.table }(${ keys.join(',') }) VALUES( ${ temp.join(',') } ) RETURNING *`, values);
+
+	return formatResponse(resp);
 };
 
-DB.update = function(data, cond) {
+DB.update = async function(data, cond) {
 
 	const set = [];
 
-
 	const values = [];
-
 
 	const where = [];
 
@@ -157,21 +152,21 @@ DB.update = function(data, cond) {
 		where.push(`${x } = $${ i++}`);
 		values.push(cond[x]);
 	}
-	return this.query(`UPDATE ${ this.table } SET ${ set.join(',') } WHERE ${ where.join(' AND ')}`, values)
-		.then(resp => {
-			if (resp.rowCount) {
-				resp.success = true;
-			}
-			else {
-				resp.error = true;
-				resp.details = 'Did not update any results';
-			}
-			return resp;
-		});
+
+	const resp = await this.query(`UPDATE ${ this.table } SET ${ set.join(',') } WHERE ${ where.join(' AND ')}`, values);
+
+	if (resp.rowCount) {
+		resp.success = true;
+	}
+	else {
+		resp.error = true;
+		resp.details = 'Did not update any results';
+	}
+	return resp;
 };
 
 
-DB.delete = function(cond) {
+DB.delete = async function(cond) {
 
 	const values = [];
 
@@ -186,8 +181,9 @@ DB.delete = function(cond) {
 		values.push(cond[x]);
 	}
 
-	return this.query(`DELETE FROM ${ this.table } WHERE ${ where.join(' AND ')}`, values)
-		.then(formatResponse);
+	const resp = await this.query(`DELETE FROM ${ this.table } WHERE ${ where.join(' AND ')}`, values);
+
+	return formatResponse(resp);
 };
 
 function formatResponse(res) {

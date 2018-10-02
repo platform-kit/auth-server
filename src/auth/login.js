@@ -48,20 +48,14 @@ app.use((req, res, next) => {
 		const json = crypt.decrypt(req.query.access_token);
 
 		if (json.user_id && json.client_id) {
-			// Get the users approved app list to add to it...
-			db('users')
-				.get(['approved_apps'], {id: json.user_id})
-				.then(data => {
-					if (data.approved_apps.split(',').indexOf(json.client_id) === -1) {
-						data.approved_apps += `,${ json.client_id}`;
-						return db('users').update(data, {id: json.user_id});
-					}
-				});
 
 			// forward the user on to their redirect_uri
 			const redirect_uri = req.query.redirect_uri;
 			delete req.query.redirect_uri;
 			res.redirect(`${redirect_uri }?${ qs.stringify(req.query)}`);
+
+			// Update the approved apps
+			updateApprovedApps(json);
 		}
 		else {
 			res.render('error', {
@@ -77,7 +71,7 @@ app.use((req, res, next) => {
 
 
 // Check the redirect_uri matches client_id
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
 
 	// Check that all the information is given, redirect_uri, redirect_uri, etc...
 	if (!req.query.client_id || !req.query.redirect_uri) {
@@ -88,47 +82,47 @@ app.use((req, res, next) => {
 	}
 
 	// Query the database for the redirect_uri which matches this database.
-	db('client_apps')
-		.get(['client_id, redirect_uri'], {client_id: req.query.client_id})
-		.then(data => {
+	try {
+		const data = await db('client_apps').get(['client_id, redirect_uri'], {client_id: req.query.client_id});
 
-			// Test that the redirect_uri exists within the response
-			if (match_redirect(data.redirect_uri, req.query.redirect_uri)) {
-			// All good...
-				next();
-			}
-			else {
-				res.render('error', {
-					message: 'The redirect_uri does not match that on record.'
-				});
-			}
-		}, err => {
-			res.render('error', err);
-		});
+		// Test that the redirect_uri exists within the response
+		if (match_redirect(data.redirect_uri, req.query.redirect_uri)) {
+		// All good...
+			next();
+		}
+		else {
+			res.render('error', {
+				message: 'The redirect_uri does not match that on record.'
+			});
+		}
+	}
+	catch (err) {
+		res.render('error', err);
+	}
+
 });
 
 
 // Bind handler to this
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
 	// Store the Request in the session for redirecting too this page after affiliate login.
 	req.session.authRequest = req.url;
 
 	// Default chain
-	let chain = Promise.resolve(null);
+	let user;
 	const userId = req.session ? req.session.user_id : undefined;
 	const clientId = req.query.client_id;
 
 	// Debug
 	debug('Building login page');
 
-	// Get the current connections for this user allocated
-	if (userId) {
-		chain = getUser(userId);
-	}
+	try {
+		// Get the current connections for this user allocated
+		if (userId) {
+			user = await getUser(userId);
+		}
 
-	// Send back to the system
-	chain.then(user => {
-
+		// Send back to the system
 		debug('Render login page for', userId);
 
 		let authResponse;
@@ -163,51 +157,50 @@ app.use((req, res, next) => {
 			query: req.query,
 			auth_response: authResponse
 		});
-	}).then(null, err => {
+	}
+
+	catch (err) {
 
 		debug(err);
 		next();
 
 		res.end();
-	});
+	}
 });
 
 // Debug
 debug('auth/login ready');
 
 // Get User Connections
-function getUser(userId) {
+async function getUser(userId) {
 
 	debug('Read user profile', userId);
 
-	return db('users')
-		.get(['*'], {id: userId})
-		.then(user => {
+	const user = await db('users').get(['*'], {id: userId});
 
-			debug('Acquired user data');
+	debug('Acquired user data');
 
-			// Ensure we got a response
-			if (user) {
+	// Ensure we got a response
+	if (user) {
 
-				// Format the list of user approved apps from a string to an array
-				user.approved_apps = (user.approved_apps || '').split(',');
+		// Format the list of user approved apps from a string to an array
+		user.approved_apps = (user.approved_apps || '').split(',');
 
-				// Transpile user data
-				user.connections = {};
+		// Transpile user data
+		user.connections = {};
 
-				for (const x in user) {
+		for (const x in user) {
 
-					// Is this a connection entry?
-					// There will be two properties, network'_id' and network'_profile'
-					if (x.match(/_profile$/)) {
-						const network = x.match(/^[^_]+/)[0];
-						user.connections[network] = JSON.parse(user[x]);
-					}
-				}
+			// Is this a connection entry?
+			// There will be two properties, network'_id' and network'_profile'
+			if (x.match(/_profile$/)) {
+				const network = x.match(/^[^_]+/)[0];
+				user.connections[network] = JSON.parse(user[x]);
 			}
+		}
+	}
 
-			return user;
-		});
+	return user;
 }
 
 function getAuthResponse(user_id, client_id) {
@@ -235,4 +228,14 @@ function match_redirect(match, path) {
 		}
 	}
 	return false;
+}
+
+async function updateApprovedApps(json) {
+	// Get the users approved app list to add to it...
+	const data = await db('users').get(['approved_apps'], {id: json.user_id});
+	if (data.approved_apps.split(',').indexOf(json.client_id) === -1) {
+		data.approved_apps += `,${ json.client_id}`;
+		// Append the client_id to the user
+		return db('users').update(data, {id: json.user_id});
+	}
 }

@@ -1,7 +1,15 @@
 {
 	"root": true,
 	"extends": "mr",
+	"plugins": [
+		"promise",
+		"security"
+	],
 	"rules": {
+		"newline-per-chained-call": 2,
+		"prefer-promise-reject-errors": 2,
+		"promise/prefer-await-to-then": 2,
+		"security/detect-unsafe-regex": 2,
 		"no-console": [2, {"allow": ["warn", "error"]}],
 		"no-path-concat": 2,
 		"no-throw-literal": 0,

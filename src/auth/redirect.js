@@ -153,7 +153,7 @@ app.all('*',
 
 // Was the login for this server
 // auth-server maintains its own list of users
-function handleGrantedAuthorization(req, res, next) {
+async function handleGrantedAuthorization(req, res, next) {
 
 	// Next: if this does not have oauthshim data...
 	if (!(req.oauthshim && req.oauthshim.data && req.oauthshim.redirect)) {
@@ -178,79 +178,72 @@ function handleGrantedAuthorization(req, res, next) {
 	debug('Session created', network, `${data.access_token.substr(0, 8) }...`);
 
 	// Promisify the passport strategies
-	let chain = promisify(strategies[network].passport.userProfile).bind(strategies[network].passport);
+	const strategy = promisify(strategies[network].passport.userProfile).bind(strategies[network].passport);
 
 	// Is this an OAuth1 requesst
 	const a = data.access_token.split(/[:@]/);
 
-	// Make request for a User Profile
-	if (a.length > 1) {
+	let profileData;
 
-		data.oauth_token = a[0];
-		data.oauth_token_secret = a[1];
+	try {
+		// Make request for a User Profile
+		if (a.length > 1) {
 
-		debug('OAuth1', data);
-		chain = chain(data.oauth_token, data.oauth_token_secret, data);
-	}
-	else {
-		chain = chain(data.access_token);
-	}
+			data.oauth_token = a[0];
+			data.oauth_token_secret = a[1];
 
-	// Format profile response
-	chain.then(data => {
-		//
-		debug(data);
+			debug('OAuth1', data);
+			profileData = await strategy(data.oauth_token, data.oauth_token_secret, data);
+		}
+		else {
+			profileData = await strategy(data.access_token);
+		}
+
+		// Format profile response
+		debug(profileData);
 		// format the response
-		if (data) {
+		if (profileData) {
 			// custom formatter
 			if (AuthServices[network][3]) {
-				AuthServices[network][3](data);
+				AuthServices[network][3](profileData);
 			}
 			// Generic formatter
-			formatPassportResponse(data);
+			formatPassportResponse(profileData);
 		}
-		return data;
-	})
-	// Handle the profile data
-		.then(profileData => {
 
-			// Match the user with the profile data
-			return setProfileToSession(network, req.session.user_id, profileData)
-				.then(user_id => {
-					debug('Session set user_id', user_id);
-					// Save this users data to the session
-					req.session.connections[network] = profileData;
-					req.session.user_id = user_id;
+		// Match the user with the profile data
+		const user_id = await setProfileToSession(network, req.session.user_id, profileData);
 
-				});
-		})
-	//
-		.then(() => {
+		debug('Session set user_id', user_id);
+		// Save this users data to the session
+		req.session.connections[network] = profileData;
+		req.session.user_id = user_id;
+
 		// Continue back to the authorization page
-			next();
-		},
-		err => {
+		next();
+	}
+	catch (err) {
 
-			// Log error
-			debug(err);
+		// Log error
+		debug(err);
 
-			// Initiate the properties which are passed to the rendered document
-			const options = {
-				session: req.session
-			};
+		// Initiate the properties which are passed to the rendered document
+		const options = {
+			session: req.session
+		};
 
-			// Duplicate?
-			if (err.message && err.message.match('duplicate')) {
-			// Error: the connection being linked is assigned to another account
-				options.message = 'Snap, this connection is linked to another account. It will have to be unlinked from the other account before it can be associated with this account';
-			}
+		// Duplicate?
+		if (err.message && err.message.match('duplicate')) {
+		// Error: the connection being linked is assigned to another account
+			options.message = 'Snap, this connection is linked to another account. It will have to be unlinked from the other account before it can be associated with this account';
+		}
 
-			// Display error page
-			res.render('error', options);
-		});
+		// Display error page
+		res.render('error', options);
+	}
 }
 
-function setProfileToSession(network, userId, profileData) {
+async function setProfileToSession(network, userId, profileData) {
 
 	// Recieved profile Data
 	debug(profileData);
@@ -258,31 +251,28 @@ function setProfileToSession(network, userId, profileData) {
 	// If the current user is signed in...
 	if (userId) {
 		// Update the current users connection
-		return getUserById(userId).then(userData => updateUserConnection(network, userData, profileData));
+		const userData = await getUserById(userId);
+		return updateUserConnection(network, userData, profileData);
 	}
 
 	// The user has not be defined.
 	// Retrieve the the user whom has this connection
-	return getUserByConnectionId(network, profileData.id)
-		.then(userData => {
+	const userData = getUserByConnectionId(network, profileData.id);
 
-			// Get userID
-			const userId = userData ? userData.id : undefined;
+	// Get userID
+	userId = userData ? userData.id : undefined;
 
-			// If the user was not found...
-			if (!userId) {
-			// Create a new user from session data
-				return createUserFromConnection(network, profileData);
-			}
+	// If the user was not found...
+	if (!userId) {
+		// Create a new user from session data
+		userId = await createUserFromConnection(network, profileData);
+	}
+	else {
+		updateUserConnection(network, userData, profileData);
+	}
 
-			else {
-				return updateUserConnection(network, userData, profileData);
-			}
-
-		}).then(userId => {
-			debug('Acquired User', userId);
-			return userId;
-		});
+	debug('Acquired User', userId);
+	return userId;
 }
 
 
@@ -291,13 +281,13 @@ function getUserById(userId) {
 	return db('users').get(['*'], {id: userId});
 }
 
-function getUserByConnectionId(network, conn_id) {
+async function getUserByConnectionId(network, conn_id) {
 
-	return db.query(`SELECT * FROM users WHERE ${ network }_id LIKE '%${ conn_id }%' LIMIT 1`)
-		.then(data => (data.rows.length ? data.rows[0] : undefined));
+	const data = await db.query(`SELECT * FROM users WHERE ${ network }_id LIKE '%${ conn_id }%' LIMIT 1`);
+	return (data.rows.length ? data.rows[0] : undefined);
 }
 
-function createUserFromConnection(network, profileData) {
+async function createUserFromConnection(network, profileData) {
 
 	debug('Create user');
 
@@ -308,15 +298,13 @@ function createUserFromConnection(network, profileData) {
 	post[`${network }_id`] = profileData.id;
 	post[`${network }_profile`] = JSON.stringify(profileData);
 
-	return db('users')
-		.insert(post)
-		.then(data => {
-		// Found the user, associate this session with them
-			return data.id;
-		});
+	const data = await db('users').insert(post);
+
+	// Found the user, associate this session with them
+	return data.id;
 }
 
-function updateUserConnection(network, userData, profileData) {
+async function updateUserConnection(network, userData, profileData) {
 
 	const cond = {id: userData.id};
 
@@ -340,12 +328,10 @@ function updateUserConnection(network, userData, profileData) {
 
 	debug('Updating user connection');
 
-	return db('users')
-		.update(post, cond)
-		.then(() => {
-		// Found the user, associate this session with them
-			return userData.id;
-		});
+	await db('users').update(post, cond);
+
+	// Found the user, associate this session with them
+	return userData.id;
 }
 
 

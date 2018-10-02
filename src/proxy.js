@@ -64,26 +64,8 @@ app.use((req, res, next) => {
 			// Save the grant URL
 			if (opts && opts.oauth) {
 
-				// Modify the record in the database.
-				const id = opts.client_id;
+				updateGrantUrl(opts);
 
-				db('apps')
-					.get(['grant_url'], {client_id: id})
-					.then(row => {
-						if (!row.grant_url) {
-						// Update DB
-							db('apps')
-								.update({grant_url: (opts.oauth.grant || opts.oauth.token)}, {client_id: id})
-								.then(res => {
-									debug(res);
-								}, err => {
-									debug(err);
-								});
-						}
-					})
-					.then(null, err => {
-						debug(err);
-					});
 			}
 		}
 	}
@@ -102,7 +84,7 @@ app.use(oauthshim.unhandled);
 //
 // Override the credentials access
 // Return the secret from a database
-oauthshim.credentials.get = (query, callback) => {
+oauthshim.credentials.get = async (query, callback) => {
 
 	// Get credentials
 	debug(query);
@@ -120,27 +102,51 @@ oauthshim.credentials.get = (query, callback) => {
 	//
 	const cond = {client_id: query.client_id};
 
-	db('apps')
-		.get(['domain', 'client_id', 'client_secret', 'grant_url', 'count_accessed'], cond)
-		.then(row => {
+	try {
+		const row = await db('apps')
+			.get(['domain', 'client_id', 'client_secret', 'grant_url', 'count_accessed'], cond);
+
+
 		// Callback
 		// "/#network="+encodeURIComponent(network)+"&client_id="+encodeURIComponent(id)
-			callback(row || null);
+		callback(row || null);
 
-			// Update the count_accessed
-			if (row && 'count_accessed' in row) {
+		// Update the count_accessed
+		if (row && 'count_accessed' in row) {
 			// Update the db last accessed
-				db('apps')
-					.update({
-						last_accessed: 'CURRENT_TIMESTAMP',
-						count_accessed: (row.count_accessed + 1)
-					}, cond)
-					.catch(err => {
-						console.error('failed to update the count_accessed field', err, cond);
-					});
-			}
-		})
-		.catch(() => {
-			callback(null);
-		});
+			db('apps')
+				.update({
+					last_accessed: 'CURRENT_TIMESTAMP',
+					count_accessed: (row.count_accessed + 1)
+				}, cond)
+				.catch(err => {
+					console.error('failed to update the count_accessed field', err, cond);
+				});
+		}
+	}
+	catch (err) {
+		callback(null);
+	}
 };
+
+
+async function updateGrantUrl(opts) {
+	// Modify the record in the database.
+	const id = opts.client_id;
+
+	try {
+
+		const row = await db('apps').get(['grant_url'], {client_id: id});
+
+		if (!row.grant_url) {
+			// Update DB
+			const res = await db('apps')
+				.update({grant_url: (opts.oauth.grant || opts.oauth.token)}, {client_id: id});
+
+			debug(res);
+		}
+	}
+	catch (err) {
+		debug(err);
+	}
+}

@@ -48,7 +48,7 @@ app.use('/:key', (req, res, next) => {
 });
 
 // Make a request for the database
-app.use('/:key/:table?', (req, res) => {
+app.use('/:key/:table?', async (req, res) => {
 
 	// const
 	const method = req.method.toLowerCase();
@@ -75,39 +75,40 @@ app.use('/:key/:table?', (req, res) => {
 		res.json({
 			error: {
 				code: 'unsupported_method',
-				message: `${method.toUpperCase() } is an unauthorized method on users`
+				message: `${method.toUpperCase()} is an unauthorized method on users`
 			}
 		});
 		return;
 	}
 
 	// Make DB call
-	rest(table, method, query, body)
-		.then(data => {
+	try {
+		const data = await rest(table, method, query, body);
 
-			debug('got data');
-			// CORS
-			// Handle each API response with some cross domain headers
-			// res.writeHead(200, {
-			// 	'Content-Type': 'application/json',
-			// 	'Access-Control-Allow-Origin': '*',
-			// 	'Access-Control-Allow-Methods': 'OPTIONS,GET,POST,PUT,DELETE',
-			// 	'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
-			// });
+		debug('got data');
 
-			// Push body of response
-			res.json(data);
+		// CORS
+		// Handle each API response with some cross domain headers
+		// res.writeHead(200, {
+		// 	'Content-Type': 'application/json',
+		// 	'Access-Control-Allow-Origin': '*',
+		// 	'Access-Control-Allow-Methods': 'OPTIONS,GET,POST,PUT,DELETE',
+		// 	'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
+		// });
 
-		}).then(null, err => {
+		// Push body of response
+		res.json(data);
+	}
+	catch (err) {
 		// Request error
-			err.code = 'data_integrity';
+		err.code = 'data_integrity';
 
-			// Push error response
-			res.json({error: err});
-		});
+		// Push error response
+		res.json({error: err});
+	}
 });
 
-function rest(table, method, query, body) {
+async function rest(table, method, query, body) {
 
 	// GET
 	if (method === 'get') {
@@ -122,12 +123,10 @@ function rest(table, method, query, body) {
 			opts.limit = 1;
 		}
 
-		return db(table)
-			.getAll(fields, cond, opts)
-			.then(data => {
-			// Is this a request for a single item
-				return query.id && data.rows ? data.rows[0] : {data: data.rows};
-			});
+		const data = await db(table).getAll(fields, cond, opts);
+
+		// Is this a request for a single item
+		return query.id && data.rows ? data.rows[0] : {data: data.rows};
 	}
 
 	else if (method === 'post') {
@@ -161,12 +160,12 @@ function rest(table, method, query, body) {
 		return db(table).delete(query);
 	}
 
-	return Promise.reject({
+	throw {
 		error: {
 			code: 'unsupported_method',
 			message: `${method.toUpperCase() }is an unsupported method`
 		}
-	});
+	};
 }
 
 function query_parts(query) {
